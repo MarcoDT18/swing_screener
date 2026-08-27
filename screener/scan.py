@@ -106,15 +106,23 @@ def main():
         })
 
     setups.sort(key=lambda s: -s["score"])
+    # top 120 overall, but guarantee each family keeps its best 15
+    top = setups[:120]
+    chosen = {s["ticker"] for s in top}
+    for fam in ("momentum", "mean_reversion", "vol_volume"):
+        extra = [s for s in setups
+                 if fam in s["families"] and s["ticker"] not in chosen][:15]
+        top.extend(extra)
+        chosen.update(s["ticker"] for s in extra)
     payload = {
         "generated_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "universe_size": len(tickers),
         "scanned": len(frames),
         "counts": {
-            fam: sum(1 for s in setups if fam in s["families"])
+            fam: sum(1 for s in top if fam in s["families"])
             for fam in ("momentum", "mean_reversion", "vol_volume")
         },
-        "setups": setups[:120],               # keep the file small
+        "setups": top,
     }
     os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
     with open(os.path.join(ROOT, "data", "scan.json"), "w") as f:

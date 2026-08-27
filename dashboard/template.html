@@ -216,7 +216,8 @@ function renderTiles() {
     const b = document.createElement("button");
     b.className = "tile" + (state.fam === key ? " on" : "");
     b.style.setProperty("--tc", `var(${f.varName})`);
-    b.innerHTML = `<span class="k">${f.label}</span><span class="v">${DATA.counts[key] ?? 0}<small> setups</small></span>`;
+    const cnt = DATA.setups.filter(s => s.families.includes(key)).length;
+    b.innerHTML = `<span class="k">${f.label}</span><span class="v">${cnt}<small> setups</small></span>`;
     b.onclick = () => { state.fam = state.fam === key ? null : key; refresh(); };
     tilesEl.appendChild(b);
   }
