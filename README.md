@@ -33,21 +33,21 @@ never crowded out.
 ## How it's put together
 
 1. `.github/workflows/scan.yml` — the schedule. Refreshes index constituent
-   lists from Wikipedia, runs the scan, commits `datagithubjson`, builds the
+   lists from Wikipedia, runs the scan, commits `data/scan.json`, builds the
    dashboard and deploys it to GitHub Pages.
 2. `screener/signals.py` — the indicator and signal library (pure pandas/numpy:
    SMA, Wilder RSI, ATR, Bollinger bands, and the seven checks above).
-3. `screener/sthubpy` — downloads prices via yfinance, runs every check,
-   ranks the results, writes `datagithubjson`.
-4. `dashboard/template.html` + `dashboard/build_dashboardbpy` — inject the JSON
+3. `screener/scan.py` — downloads prices via yfinance, runs every check,
+   ranks the results, writes `data/scan.json`.
+4. `dashboard/template.html` + `dashboard/build_dashboard.py` — inject the JSON
    into a self-contained HTML page at `site/index.html`.
 
 ## Run it yourself
 
 ```bash
 pip install -r requirements.txt
-python screener/sthubpy                 # writes datagithubjson (~2 min)
-python dashboard/build_dashboardbpy     # writes site/index.html — open in a browser
+python screener/scan.py                 # writes data/scan.json (~2 min)
+python dashboard/build_dashboard.py     # writes site/index.html — open in a browser
 ```
 
 > **Not financial advice.** This is a mechanical screen of end-of-day data — it

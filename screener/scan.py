@@ -87,7 +87,7 @@ def main():
         # extra momentum signal: top-decile relative strength AND above SMA20
         if rs >= 0.90 and extras["close"] > df["Close"].rolling(20).mean().iloc[-1]:
             hits.append({"signal": "rel_strength", "family": "momentum",
-                         "detail": f"3m return in top {100 - int(rs * 100)}% of universe"})
+                         "detail": f"3-month gain in the top {100 - int(rs * 100)}% of all stocks tracked"})
         if not hits:
             continue
         plan = trade_plan(df)

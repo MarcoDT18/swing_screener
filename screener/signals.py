@@ -69,7 +69,7 @@ def sig_ma_crossover(df, lookback=3):
     if recent.any() and df["Close"].iloc[-1] > s20.iloc[-1]:
         days_ago = lookback - 1 - int(np.argmax(recent.values[::-1]))
         return {"signal": "ma_crossover", "family": "momentum",
-                "detail": f"SMA20 crossed above SMA50 {days_ago}d ago"}
+                "detail": f"20-day average rose above the 50-day {days_ago} day(s) ago"}
     return None
 
 
@@ -82,7 +82,7 @@ def sig_breakout(df, window=55, vol_mult=1.5):
     last = df.iloc[-1]
     if last["Close"] > prior_high and last["Volume"] > vol_mult * vol_avg:
         return {"signal": "breakout", "family": "momentum",
-                "detail": f"new {window}d closing high, volume {last['Volume']/vol_avg:.1f}x avg"}
+                "detail": f"highest close in {window} days, on {last['Volume']/vol_avg:.1f}x normal volume"}
     return None
 
 
@@ -106,7 +106,7 @@ def sig_pullback(df):
     near_support = abs(close.iloc[-1] / s50.iloc[-1] - 1) < 0.03
     if uptrend and r < 40 and near_support:
         return {"signal": "pullback", "family": "mean_reversion",
-                "detail": f"uptrend intact, RSI {r:.0f}, at SMA50 support"}
+                "detail": f"long-term climb intact, now resting at its 50-day support (RSI {r:.0f})"}
     return None
 
 
@@ -121,7 +121,7 @@ def sig_oversold_bounce(df):
     green = close.iloc[-1] > df["Open"].iloc[-1]
     if close.iloc[-2] < lower.iloc[-2] and s50.iloc[-1] > s50.iloc[-11] and green:
         return {"signal": "oversold_bounce", "family": "mean_reversion",
-                "detail": "closed below lower Bollinger band, green reversal day"}
+                "detail": "fell below its usual range, then closed higher on the day"}
     return None
 
 
@@ -134,7 +134,7 @@ def sig_volume_spike(df, mult=2.5):
     last, prev = df.iloc[-1], df.iloc[-2]
     if vol_avg > 0 and last["Volume"] > mult * vol_avg and last["Close"] > prev["Close"]:
         return {"signal": "volume_spike", "family": "vol_volume",
-                "detail": f"volume {last['Volume']/vol_avg:.1f}x 20d avg on an up day"}
+                "detail": f"{last['Volume']/vol_avg:.1f}x normal volume on a rising day"}
     return None
 
 
@@ -151,7 +151,7 @@ def sig_squeeze(df, pctile=0.10):
         return None
     if bw.iloc[-1] <= hist.quantile(pctile) and close.iloc[-1] > sma(close, 50).iloc[-1]:
         return {"signal": "squeeze", "family": "vol_volume",
-                "detail": "volatility squeeze (bandwidth in lowest 10% of 6m), above SMA50"}
+                "detail": "quietest trading range in six months, still above its 50-day trend"}
     return None
 
 
