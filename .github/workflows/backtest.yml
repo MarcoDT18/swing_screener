@@ -1,11 +1,10 @@
-name: Daily scan
+name: Backtest
 
 on:
   schedule:
-    # 05:45 UTC, Tue-Sat — after the previous US close is final.
-    # (Yesterday's US close + FTSE close are both in by then.)
-    - cron: "45 5 * * 2-6"
-  workflow_dispatch: {}   # lets you run it manually from the Actions tab
+    # first Saturday-ish of each month, after that morning's scan
+    - cron: "30 7 1 * *"
+  workflow_dispatch: {}   # run it any time from the Actions tab
 
 permissions:
   contents: write
@@ -17,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  scan:
+  backtest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,27 +28,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Refresh ticker lists (best effort)
-        run: python screener/refresh_tickers.py || echo "refresh failed, using committed lists"
-
-      - name: Run the scan
-        run: python screener/scan.py
+      - name: Run the backtest (~5y, all tickers)
+        run: python backtest/backtest.py
 
       - name: Commit results
         run: |
           git config user.name "screener-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/scan.json tickers/
-          git diff --cached --quiet || git commit -m "scan: $(date -u +%F)"
+          git pull --rebase origin main
+          git add data/backtest.json
+          git diff --cached --quiet || git commit -m "backtest: $(date -u +%F)"
           git push
 
-      - name: Build dashboard page
+      - name: Build site
         run: python dashboard/build_site.py
-
-      - name: Setup Pages (auto-enable)
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

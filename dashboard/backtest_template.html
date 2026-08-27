@@ -1,0 +1,199 @@
+<title>Signal Desk — Backtest</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #f6f7f9; --surface: #ffffff; --surface-2: #eef0f4;
+    --ink: #14171e; --ink-2: #5b6472; --ink-3: #8a93a3; --line: #e2e5eb;
+    --accent: #2a78d6;
+    --mom: #2a78d6; --rev: #c98500; --vol: #4a3aa7;
+    --mom-bg: #2a78d61a; --rev-bg: #c985001f; --vol-bg: #4a3aa716;
+    --up: #0a7a35; --down: #c23838;
+    --shadow: 0 1px 2px #14171e0d, 0 4px 16px #14171e0a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101319; --surface: #171b23; --surface-2: #1f2530;
+      --ink: #e8eaef; --ink-2: #9aa3b2; --ink-3: #6b7484; --line: #262c38;
+      --accent: #3987e5;
+      --mom: #3987e5; --rev: #c98500; --vol: #9085e9;
+      --mom-bg: #3987e526; --rev-bg: #c9850026; --vol-bg: #9085e922;
+      --up: #35b96a; --down: #e06060;
+      --shadow: 0 1px 2px #0006, 0 6px 20px #0004;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101319; --surface: #171b23; --surface-2: #1f2530;
+    --ink: #e8eaef; --ink-2: #9aa3b2; --ink-3: #6b7484; --line: #262c38;
+    --accent: #3987e5;
+    --mom: #3987e5; --rev: #c98500; --vol: #9085e9;
+    --mom-bg: #3987e526; --rev-bg: #c9850026; --vol-bg: #9085e922;
+    --up: #35b96a; --down: #e06060;
+    --shadow: 0 1px 2px #0006, 0 6px 20px #0004;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.5; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; }
+  h1 { margin: 0; font-stretch: 115%; font-weight: 800; font-size: 26px; }
+  h1 small { font-weight: 500; color: var(--ink-2); font-size: 17px; }
+  .stamp { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-2); }
+  .stamp b { color: var(--ink); }
+  a.back { color: var(--accent); text-decoration: none; font-size: 13.5px; }
+  a.back:hover { text-decoration: underline; }
+  .sub { margin: 8px 0 20px; color: var(--ink-2); max-width: 70ch; }
+  h2 { font-size: 16px; margin: 26px 0 10px; }
+  .note { color: var(--ink-2); font-size: 13.5px; max-width: 70ch; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+          box-shadow: var(--shadow); padding: 16px; overflow-x: auto; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0 6px; }
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 11px 13px; }
+  .kpi .k { display:block; font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+            letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  .kpi .v { display:block; font-family: "IBM Plex Mono", monospace; font-size: 21px; font-weight: 600;
+            margin-top: 2px; font-variant-numeric: tabular-nums; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; }
+  th { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .08em;
+       text-transform: uppercase; color: var(--ink-2); font-weight: 500; text-align: right;
+       padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th.l, td.l { text-align: left; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: right;
+       font-family: "IBM Plex Mono", monospace; font-size: 13px; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: 0; }
+  tr.base td { color: var(--ink-2); font-style: normal; background: var(--surface-2); }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 7px; }
+  .signame { font-family: "Archivo", sans-serif; font-weight: 600; }
+  .up { color: var(--up); } .down { color: var(--down); }
+  .muted { color: var(--ink-3); }
+  #chart svg { display: block; max-width: 100%; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 2px; font-size: 12.5px; color: var(--ink-2); }
+  footer { margin-top: 26px; font-size: 12.5px; color: var(--ink-3); max-width: 70ch; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Signal Desk <small>· backtest</small></h1>
+    <span class="stamp" id="meta"></span>
+    <a class="back" href="index.html">← today's scan</a>
+  </header>
+  <p class="sub">The question this page answers: <b>if you had taken every flag this screener
+  raises, with the exact exit rules it suggests, would you have done better than entering
+  trades at random?</b> Everything below is measured in <b>R</b> — profit in units of what
+  the trade risked. +1R means a trade made exactly what it risked; −1R means it hit its stop.</p>
+
+  <div id="content"></div>
+
+  <footer id="rules"></footer>
+</div>
+
+<script>
+const BT = /*__BT_DATA__*/;
+
+const FAM_OF = { ma_crossover:"mom", breakout:"mom", rel_strength:"mom",
+                 pullback:"rev", oversold_bounce:"rev",
+                 volume_spike:"vol", squeeze:"vol" };
+const NAME = { ma_crossover:"New uptrend", breakout:"Breakout", rel_strength:"Market leader",
+               pullback:"Dip in an uptrend", oversold_bounce:"Oversold, turning up",
+               volume_spike:"Unusual volume", squeeze:"Coiled spring" };
+const FAML = { mom:"Trending up", rev:"Buy the dip", vol:"Unusual activity" };
+
+const el = document.getElementById("content");
+
+if (!BT) {
+  document.getElementById("meta").textContent = "no results yet";
+  el.innerHTML = `<div class="card"><p class="note" style="margin:4px 0">The backtest hasn't
+  been run yet. On GitHub, open the <b>Actions</b> tab, choose <b>Backtest</b>, and press
+  <b>Run workflow</b> — results appear here when it finishes (~20 minutes).</p></div>`;
+} else {
+  document.getElementById("meta").innerHTML =
+    `<b>${BT.period.start}</b> → <b>${BT.period.end}</b> · ${BT.tickers_tested} stocks · ${BT.total_trades.toLocaleString()} simulated trades`;
+  document.getElementById("rules").textContent =
+    `Rules for every simulated trade: enter at the next day's open after a signal; stop ${BT.rules.atr_stop}× the stock's average daily range below entry; target ${BT.rules.atr_target}× above; time exit after ${BT.rules.hold_days} sessions; ${BT.rules.cost_per_side_pct}% costs per side. When a day touched both stop and target, the stop is counted first (the pessimistic choice). Past patterns are no promise about future ones — this is analysis, not advice.`;
+
+  const base = BT.baseline;
+  const sigs = Object.entries(BT.by_signal).sort((a,b) => b[1].avg_r - a[1].avg_r);
+
+  // ---- headline KPIs ----
+  const best = sigs[0];
+  el.innerHTML += `<div class="kpis">
+    <div class="kpi"><span class="k">Random baseline</span><span class="v">${fmtR(base.avg_r)}</span></div>
+    <div class="kpi"><span class="k">Best signal</span><span class="v">${fmtR(best[1].avg_r)}</span></div>
+    <div class="kpi"><span class="k">Signals beating random</span><span class="v">${sigs.filter(([,v]) => v.avg_r > base.avg_r).length} / ${sigs.length}</span></div>
+  </div>
+  <p class="note">The <b>random baseline</b> is the same number of trades entered on randomly
+  chosen stocks and days, managed with identical exits. It captures how much the market drift
+  and the exit rules earn on their own — a signal only carries real information if it beats it.</p>`;
+
+  // ---- chart: average R per signal vs baseline ----
+  el.innerHTML += `<h2>Average result per trade, by signal</h2>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--mom)"></span>Trending up</span>
+      <span><span class="dot" style="background:var(--rev)"></span>Buy the dip</span>
+      <span><span class="dot" style="background:var(--vol)"></span>Unusual activity</span>
+      <span class="muted">dashed line = random baseline</span>
+    </div>
+    <div class="card" id="chart">${barChart(sigs, base.avg_r)}</div>`;
+
+  // ---- per-signal table ----
+  let rows = sigs.map(([k, v]) => {
+    const d = v.avg_r - base.avg_r;
+    return `<tr>
+      <td class="l"><span class="dot" style="background:var(--${FAM_OF[k]})"></span><span class="signame">${NAME[k] || k}</span></td>
+      <td>${v.trades.toLocaleString()}</td>
+      <td>${v.win_rate}%</td>
+      <td>${fmtR(v.avg_r)}</td>
+      <td class="${d > 0.005 ? "up" : d < -0.005 ? "down" : "muted"}">${fmtR(d)}</td>
+      <td>${v.profit_factor}</td>
+      <td class="muted">${v.avg_hold}d</td>
+    </tr>`;
+  }).join("");
+  rows += `<tr class="base"><td class="l">Random entries (baseline)</td>
+    <td>${base.trades.toLocaleString()}</td><td>${base.win_rate}%</td>
+    <td>${fmtR(base.avg_r)}</td><td>—</td><td>${base.profit_factor}</td><td>—</td></tr>`;
+  el.innerHTML += `<h2>The numbers</h2><div class="card"><table>
+    <thead><tr><th class="l">Signal</th><th title="simulated trades">Trades</th>
+    <th title="share of trades that made money">Win rate</th>
+    <th title="average profit in units of risk">Avg R</th>
+    <th title="average R minus the random baseline — the actual edge">Edge vs random</th>
+    <th title="gross profits divided by gross losses">Profit factor</th>
+    <th>Avg hold</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="note">Reading it: <b>Edge vs random</b> is the column that matters — it is the
+    part of the result the signal itself contributed. Win rates below 50% with positive R are
+    normal here: winners are built to pay ~1.7× what losers cost.</p>`;
+
+  // ---- by year ----
+  const years = Object.entries(BT.by_year).sort();
+  el.innerHTML += `<h2>Consistency by year</h2><div class="card"><table>
+    <thead><tr><th class="l">Year</th><th>Trades</th><th>Win rate</th><th>Avg R</th><th>Profit factor</th></tr></thead>
+    <tbody>${years.map(([y, v]) => `<tr><td class="l">${y}</td><td>${v.trades.toLocaleString()}</td>
+      <td>${v.win_rate}%</td><td class="${v.avg_r > 0 ? "up" : "down"}">${fmtR(v.avg_r)}</td>
+      <td>${v.profit_factor}</td></tr>`).join("")}</tbody></table></div>
+    <p class="note">A signal set you can trust behaves similarly across different market years —
+    one great year carrying the average is a warning sign, not a feature.</p>`;
+}
+
+function fmtR(v) { return (v > 0 ? "+" : "") + v.toFixed(3) + "R"; }
+
+function barChart(sigs, baseR) {
+  const W = 880, rowH = 34, padL = 170, padR = 84, padT = 8;
+  const H = padT + sigs.length * rowH + 26;
+  const vals = sigs.map(([, v]) => v.avg_r).concat([baseR, 0]);
+  const lo = Math.min(...vals) - 0.03, hi = Math.max(...vals) + 0.03;
+  const x = v => padL + (v - lo) / (hi - lo) * (W - padL - padR);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="average R per signal versus the random baseline">`;
+  // zero axis + baseline reference
+  s += `<line x1="${x(0)}" y1="${padT}" x2="${x(0)}" y2="${H - 22}" stroke="var(--line)" stroke-width="1"/>`;
+  s += `<line x1="${x(baseR)}" y1="${padT}" x2="${x(baseR)}" y2="${H - 22}" stroke="var(--ink-3)" stroke-width="1.4" stroke-dasharray="4 4"/>`;
+  s += `<text x="${x(baseR)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--ink-2)" font-family="IBM Plex Mono,monospace">random ${fmtR(baseR)}</text>`;
+  sigs.forEach(([k, v], i) => {
+    const y = padT + i * rowH;
+    const x0 = Math.min(x(0), x(v.avg_r)), x1 = Math.max(x(0), x(v.avg_r));
+    s += `<text x="${padL - 10}" y="${y + 21}" text-anchor="end" font-size="13" fill="var(--ink)" font-family="Archivo,sans-serif">${NAME[k] || k}</text>`;
+    s += `<rect x="${x0}" y="${y + 8}" width="${Math.max(1.5, x1 - x0)}" height="18" rx="3"
+           fill="var(--${FAM_OF[k]})"><title>${NAME[k]}: ${fmtR(v.avg_r)} average over ${v.trades.toLocaleString()} trades</title></rect>`;
+    s += `<text x="${x1 + 8}" y="${y + 21}" font-size="12" fill="var(--ink-2)" font-family="IBM Plex Mono,monospace">${fmtR(v.avg_r)}</text>`;
+  });
+  return s + "</svg>";
+}
+</script>

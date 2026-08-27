@@ -1,0 +1,159 @@
+{
+ "generated_utc": "2026-08-27T23:30:59+00:00",
+ "period": {
+  "start": "2013-09-27",
+  "end": "2018-02-05"
+ },
+ "rules": {
+  "hold_days": 20,
+  "atr_stop": 1.5,
+  "atr_target": 2.5,
+  "cost_per_side_pct": 0.1
+ },
+ "tickers_tested": 498,
+ "total_trades": 60378,
+ "baseline": {
+  "trades": 20000,
+  "win_rate": 43.7,
+  "avg_r": 0.044,
+  "median_r": -1.04,
+  "profit_factor": 1.08
+ },
+ "by_signal": {
+  "breakout": {
+   "trades": 6337,
+   "win_rate": 41.2,
+   "avg_r": -0.033,
+   "median_r": -1.048,
+   "profit_factor": 0.95,
+   "avg_hold": 8.9,
+   "exit_mix": {
+    "stop": 3499,
+    "target": 2091,
+    "time": 747
+   }
+  },
+  "ma_crossover": {
+   "trades": 25787,
+   "win_rate": 42.8,
+   "avg_r": 0.01,
+   "median_r": -1.046,
+   "profit_factor": 1.02,
+   "avg_hold": 9.3,
+   "exit_mix": {
+    "stop": 14003,
+    "target": 9021,
+    "time": 2763
+   }
+  },
+  "oversold_bounce": {
+   "trades": 5818,
+   "win_rate": 44.2,
+   "avg_r": 0.068,
+   "median_r": -1.037,
+   "profit_factor": 1.12,
+   "avg_hold": 9.0,
+   "exit_mix": {
+    "stop": 3043,
+    "target": 2194,
+    "time": 581
+   }
+  },
+  "pullback": {
+   "trades": 2940,
+   "win_rate": 46.4,
+   "avg_r": 0.105,
+   "median_r": -1.04,
+   "profit_factor": 1.19,
+   "avg_hold": 8.3,
+   "exit_mix": {
+    "stop": 1499,
+    "target": 1136,
+    "time": 305
+   }
+  },
+  "rel_strength": {
+   "trades": 6824,
+   "win_rate": 43.8,
+   "avg_r": 0.044,
+   "median_r": -1.038,
+   "profit_factor": 1.08,
+   "avg_hold": 9.1,
+   "exit_mix": {
+    "stop": 3664,
+    "target": 2468,
+    "time": 692
+   }
+  },
+  "squeeze": {
+   "trades": 8800,
+   "win_rate": 41.8,
+   "avg_r": 0.0,
+   "median_r": -1.053,
+   "profit_factor": 1.0,
+   "avg_hold": 8.4,
+   "exit_mix": {
+    "stop": 4913,
+    "target": 3228,
+    "time": 659
+   }
+  },
+  "volume_spike": {
+   "trades": 3872,
+   "win_rate": 42.8,
+   "avg_r": 0.011,
+   "median_r": -1.036,
+   "profit_factor": 1.02,
+   "avg_hold": 9.3,
+   "exit_mix": {
+    "stop": 2055,
+    "target": 1286,
+    "time": 531
+   }
+  }
+ },
+ "by_year": {
+  "2013": {
+   "trades": 4551,
+   "win_rate": 51.6,
+   "avg_r": 0.248,
+   "median_r": 0.226,
+   "profit_factor": 1.5
+  },
+  "2014": {
+   "trades": 14383,
+   "win_rate": 41.4,
+   "avg_r": -0.024,
+   "median_r": -1.053,
+   "profit_factor": 0.96
+  },
+  "2015": {
+   "trades": 11770,
+   "win_rate": 35.1,
+   "avg_r": -0.183,
+   "median_r": -1.052,
+   "profit_factor": 0.73
+  },
+  "2016": {
+   "trades": 12975,
+   "win_rate": 44.2,
+   "avg_r": 0.05,
+   "median_r": -1.033,
+   "profit_factor": 1.09
+  },
+  "2017": {
+   "trades": 14832,
+   "win_rate": 47.3,
+   "avg_r": 0.133,
+   "median_r": -0.719,
+   "profit_factor": 1.24
+  },
+  "2018": {
+   "trades": 1867,
+   "win_rate": 38.2,
+   "avg_r": -0.084,
+   "median_r": -1.055,
+   "profit_factor": 0.87
+  }
+ }
+}
