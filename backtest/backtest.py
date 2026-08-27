@@ -110,12 +110,35 @@ def simulate(df, idx, a):
     return gross_r - cost_r, j - idx, reason
 
 
-def run(frames):
-    """frames: {ticker: OHLCV DataFrame}. Returns the results payload."""
+def regime_series(index_close):
+    """True on days the index closed above its 200-day average (risk-on)."""
+    return (index_close > index_close.rolling(200).mean()).fillna(False)
+
+
+def run(frames, indices=None):
+    """frames: {ticker: OHLCV DataFrame}; indices: {"us": Series, "uk": Series}
+    of index closes (optional — regime split skipped without them)."""
     closes = pd.DataFrame({t: d["Close"] for t, d in frames.items()})
     rs_frame = rel_strength_mask(closes)
 
-    trades = []            # (signal, ticker, date, R, hold, reason)
+    regimes = {}
+    if indices:
+        for key, ser in indices.items():
+            if ser is not None and len(ser) > 220:
+                regimes[key] = regime_series(ser)
+
+    def regime_at(ticker, date):
+        key = "uk" if ticker.endswith(".L") else "us"
+        reg = regimes.get(key)
+        if reg is None:
+            return None
+        try:
+            pos = reg.index.get_indexer([date], method="ffill")[0]
+            return bool(reg.iloc[pos]) if pos >= 0 else None
+        except Exception:
+            return None
+
+    trades = []            # (signal, ticker, date, R, hold, reason, risk_on)
     for t, df in frames.items():
         masks = signal_masks(df)
         if t in rs_frame.columns:
@@ -134,7 +157,8 @@ def run(frames):
                     continue
                 r_mult, hold, reason = res
                 open_until[sig] = idx + hold
-                trades.append((sig, t, str(df.index[idx].date()), r_mult, hold, reason))
+                trades.append((sig, t, str(df.index[idx].date()), r_mult, hold, reason,
+                               regime_at(t, df.index[idx])))
 
     # ---------- random baseline: same trade count, same exits ----------
     tickers = list(frames)
@@ -162,16 +186,46 @@ def run(frames):
             "profit_factor": round(float(rs[rs > 0].sum() / max(1e-9, -rs[rs <= 0].sum())), 2),
         }
 
+    base_arr = np.array(base, dtype=float)
+
+    def p_value(rs):
+        """One-sided test: probability the signal's edge over the random
+        baseline is luck (difference-of-means z-test)."""
+        rs = np.array(rs, dtype=float)
+        if len(rs) < 30 or len(base_arr) < 30:
+            return None
+        diff = rs.mean() - base_arr.mean()
+        se = np.sqrt(rs.var(ddof=1) / len(rs) + base_arr.var(ddof=1) / len(base_arr))
+        if se == 0:
+            return None
+        from math import erf, sqrt
+        z = diff / se
+        return round(1 - 0.5 * (1 + erf(z / sqrt(2))), 3)
+
     by_signal = {}
-    tdf = pd.DataFrame(trades, columns=["signal", "ticker", "date", "r", "hold", "reason"])
+    tdf = pd.DataFrame(trades, columns=["signal", "ticker", "date", "r", "hold",
+                                        "reason", "risk_on"])
     for sig, g in tdf.groupby("signal"):
         s = stats(g["r"].tolist())
         s["avg_hold"] = round(float(g["hold"].mean()), 1)
         s["exit_mix"] = {k: int(v) for k, v in g["reason"].value_counts().items()}
+        s["p_value"] = p_value(g["r"].tolist())
+        if g["risk_on"].notna().any():
+            s["regime"] = {
+                "risk_on": stats(g.loc[g["risk_on"] == True, "r"].tolist()),
+                "risk_off": stats(g.loc[g["risk_on"] == False, "r"].tolist()),
+            }
         by_signal[sig] = s
 
     tdf["year"] = tdf["date"].str[:4]
     by_year = {y: stats(g["r"].tolist()) for y, g in tdf.groupby("year")}
+
+    regime_overall = None
+    if tdf["risk_on"].notna().any():
+        regime_overall = {
+            "risk_on": stats(tdf.loc[tdf["risk_on"] == True, "r"].tolist()),
+            "risk_off": stats(tdf.loc[tdf["risk_on"] == False, "r"].tolist()),
+        }
 
     return {
         "generated_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
@@ -181,6 +235,7 @@ def run(frames):
         "tickers_tested": len(frames),
         "total_trades": int(len(tdf)),
         "baseline": stats(base),
+        "regime_overall": regime_overall,
         "by_signal": by_signal,
         "by_year": by_year,
     }
@@ -208,7 +263,15 @@ def load_yfinance():
             if len(df) >= 300:
                 frames[t] = df
         print(f"  downloaded {min(i + B, len(tickers))}/{len(tickers)}", flush=True)
-    return frames
+    idx = yf.download(["^GSPC", "^FTSE"], period=YEARS, interval="1d",
+                      group_by="ticker", auto_adjust=True, threads=True, progress=False)
+    indices = {}
+    for key, sym in (("us", "^GSPC"), ("uk", "^FTSE")):
+        try:
+            indices[key] = idx[sym]["Close"].dropna()
+        except KeyError:
+            indices[key] = None
+    return frames, indices
 
 
 def load_csv(path):
@@ -219,16 +282,18 @@ def load_csv(path):
         df = g.set_index("Date").sort_index()[["Open", "High", "Low", "Close", "Volume"]].dropna()
         if len(df) >= 300:
             frames[t] = df
-    return frames
+    # offline proxy index: equal-weight average of all closes
+    proxy = pd.DataFrame({t: d["Close"] / d["Close"].iloc[0] for t, d in frames.items()}).mean(axis=1)
+    return frames, {"us": proxy, "uk": None}
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--csv", help="offline long CSV instead of yfinance")
     args = ap.parse_args()
-    frames = load_csv(args.csv) if args.csv else load_yfinance()
+    frames, indices = load_csv(args.csv) if args.csv else load_yfinance()
     print(f"Backtesting {len(frames)} tickers…", flush=True)
-    payload = run(frames)
+    payload = run(frames, indices)
     os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
     with open(os.path.join(ROOT, "data", "backtest.json"), "w") as f:
         json.dump(payload, f, indent=1)

@@ -64,6 +64,26 @@ def download_all(tickers):
     return out
 
 
+def market_regime():
+    """Where each market sits vs its 200-day average (the Faber filter)."""
+    try:
+        idx = yf.download(["^GSPC", "^FTSE"], period="2y", interval="1d",
+                          group_by="ticker", auto_adjust=True, progress=False)
+        out = {}
+        for key, sym, label in (("us", "^GSPC", "S&P 500"), ("uk", "^FTSE", "FTSE 100")):
+            c = idx[sym]["Close"].dropna()
+            if len(c) < 210:
+                continue
+            ma = float(c.rolling(200).mean().iloc[-1])
+            out[key] = {"index": label,
+                        "risk_on": bool(float(c.iloc[-1]) > ma),
+                        "pct_vs_ma": round((float(c.iloc[-1]) / ma - 1) * 100, 1)}
+        return out or None
+    except Exception as e:
+        print(f"regime fetch failed: {e}")
+        return None
+
+
 def main():
     uni = load_universe()
     tickers = sorted(uni)
@@ -116,6 +136,7 @@ def main():
         chosen.update(s["ticker"] for s in extra)
     payload = {
         "generated_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "regime": market_regime(),
         "universe_size": len(tickers),
         "scanned": len(frames),
         "counts": {

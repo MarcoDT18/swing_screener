@@ -144,6 +144,7 @@ if (!BT) {
       <td>${v.win_rate}%</td>
       <td>${fmtR(v.avg_r)}</td>
       <td class="${d > 0.005 ? "up" : d < -0.005 ? "down" : "muted"}">${fmtR(d)}</td>
+      <td>${luck(v.p_value, d)}</td>
       <td>${v.profit_factor}</td>
       <td class="muted">${v.avg_hold}d</td>
     </tr>`;
@@ -156,11 +157,36 @@ if (!BT) {
     <th title="share of trades that made money">Win rate</th>
     <th title="average profit in units of risk">Avg R</th>
     <th title="average R minus the random baseline — the actual edge">Edge vs random</th>
+    <th title="one-sided p-value vs the baseline: how easily this edge could be pure chance">Luck?</th>
     <th title="gross profits divided by gross losses">Profit factor</th>
     <th>Avg hold</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="note">Reading it: <b>Edge vs random</b> is the column that matters — it is the
     part of the result the signal itself contributed. Win rates below 50% with positive R are
     normal here: winners are built to pay ~1.7× what losers cost.</p>`;
+
+  // ---- regime split ----
+  const hasRegime = sigs.some(([, v]) => v.regime && (v.regime.risk_on || v.regime.risk_off));
+  if (hasRegime) {
+    const ro = BT.regime_overall;
+    let rrows = sigs.map(([k, v]) => {
+      const on = v.regime && v.regime.risk_on, off = v.regime && v.regime.risk_off;
+      return `<tr><td class="l"><span class="dot" style="background:var(--${FAM_OF[k]})"></span><span class="signame">${NAME[k] || k}</span></td>
+        <td class="${on && on.avg_r > 0 ? "up" : "down"}">${on ? fmtR(on.avg_r) : "—"}</td><td class="muted">${on ? on.trades.toLocaleString() : ""}</td>
+        <td class="${off && off.avg_r > 0 ? "up" : "down"}">${off ? fmtR(off.avg_r) : "—"}</td><td class="muted">${off ? off.trades.toLocaleString() : ""}</td></tr>`;
+    }).join("");
+    if (ro) rrows += `<tr class="base"><td class="l">All signals together</td>
+      <td>${ro.risk_on ? fmtR(ro.risk_on.avg_r) : "—"}</td><td class="muted">${ro.risk_on ? ro.risk_on.trades.toLocaleString() : ""}</td>
+      <td>${ro.risk_off ? fmtR(ro.risk_off.avg_r) : "—"}</td><td class="muted">${ro.risk_off ? ro.risk_off.trades.toLocaleString() : ""}</td></tr>`;
+    el.innerHTML += `<h2>The market filter: does the 200-day rule help?</h2>
+      <div class="card"><table><thead><tr><th class="l">Signal</th>
+      <th>Avg R, market above 200-day</th><th>trades</th>
+      <th>Avg R, market below 200-day</th><th>trades</th></tr></thead>
+      <tbody>${rrows}</tbody></table></div>
+      <p class="note">"Above/below the 200-day" is each stock's own market index (S&P 500 or
+      FTSE 100) versus its 200-day average — the classic Faber trend filter. If results are
+      consistently better in the "above" column, taking flags only in that regime is the
+      simplest upgrade available.</p>`;
+  }
 
   // ---- by year ----
   const years = Object.entries(BT.by_year).sort();
@@ -174,6 +200,14 @@ if (!BT) {
 }
 
 function fmtR(v) { return (v > 0 ? "+" : "") + v.toFixed(3) + "R"; }
+
+function luck(p, edge) {
+  if (p === null || p === undefined) return `<span class="muted">—</span>`;
+  if (edge <= 0) return `<span class="muted">no edge</span>`;
+  if (p < 0.05) return `<span class="up">unlikely (p=${p})</span>`;
+  if (p < 0.2) return `<span class="muted">uncertain (p=${p})</span>`;
+  return `<span class="muted">plausibly (p=${p})</span>`;
+}
 
 function barChart(sigs, baseR) {
   const W = 880, rowH = 34, padL = 170, padR = 84, padT = 8;

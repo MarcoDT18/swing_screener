@@ -197,6 +197,8 @@
     </div>
   </details>
 
+  <div class="filters" id="regime" hidden></div>
+
   <div class="tiles" id="tiles"></div>
 
   <div class="filters" id="uniFilters">
@@ -259,6 +261,19 @@ document.getElementById("scanDate").textContent = (DATA.generated_utc || "").sli
 document.getElementById("scanMeta").textContent =
   `${DATA.scanned} stocks checked · ${DATA.setups.length} flagged`;
 if (DATA.sample) document.getElementById("sampleBadge").hidden = false;
+
+// ---- market regime banner (the Faber 200-day filter) ----
+if (DATA.regime) {
+  const el = document.getElementById("regime");
+  el.hidden = false;
+  el.innerHTML = Object.values(DATA.regime).map(r => {
+    const on = r.risk_on;
+    return `<span class="chip" style="cursor:default;color:var(--${on ? "up" : "down"});border-color:var(--${on ? "up" : "down"})" ` +
+      `title="${on ? "Historically the friendlier regime for these long-only signals"
+                   : "Caution: in past bear phases every signal family lost on average"}">` +
+      `${r.index} ${r.pct_vs_ma > 0 ? "+" : ""}${r.pct_vs_ma}% vs 200-day — ${on ? "tailwind" : "headwind"}</span>`;
+  }).join("");
+}
 
 // ---------- stat tiles (family filters) ----------
 const tilesEl = document.getElementById("tiles");
