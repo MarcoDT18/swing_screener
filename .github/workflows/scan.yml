@@ -1,0 +1,38 @@
+name: Daily scan
+
+on:
+  schedule:
+    # 05:45 UTC, Tue-Sat — after the previous US close is final.
+    # (Yesterday's US close + FTSE close are both in by then.)
+    - cron: "45 5 * * 2-6"
+  workflow_dispatch: {}   # lets you run it manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh ticker lists (best effort)
+        run: python screener/refresh_tickers.py || echo "refresh failed, using committed lists"
+
+      - name: Run the scan
+        run: python screener/scan.py
+
+      - name: Commit results
+        run: |
+          git config user.name "screener-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/scan.json tickers/
+          git diff --cached --quiet || git commit -m "scan: $(date -u +%F)"
+          git push
