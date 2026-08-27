@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   scan:
@@ -36,3 +38,15 @@ jobs:
           git add data/scan.json tickers/
           git diff --cached --quiet || git commit -m "scan: $(date -u +%F)"
           git push
+
+      - name: Build dashboard page
+        run: python dashboard/build_dashboard.py
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
