@@ -1,43 +1,55 @@
-# Swing Screener
+# Swing Screener — "Signal Desk"
 
-A daily swing-trade screener for the **S&P 500, Nasdaq-100 and FTSE 100**.
+A fully automated swing-trade screener for the **S&P 500, Nasdaq-100 and FTSE 100**.
 
-Every weekday morning a GitHub Action downloads ~1 year of daily bars for
-~700 tickers, runs a signal engine over them, and commits the results to
-`data/scan.json`. A Claude scheduled task then picks that file up and
-republishes a hosted dashboard.
+Every weekday morning (05:45 UTC, Tue–Sat) a GitHub Action downloads about a year
+of daily prices for ~700 stocks, checks each one for classic swing-trade patterns,
+and deploys the results as a dashboard on GitHub Pages:
 
-## Signals
+**Live dashboard → https://marcodt18.github.io/swing_screener/**
 
-| Family | Signal | What it looks for |
+No servers, no manual steps: GitHub's free Actions runners do the scanning and the
+publishing.
+
+## What it looks for
+
+| Family | Signal | Plain English |
 |---|---|---|
-| Momentum | `ma_crossover` | SMA20 crossed above SMA50 in the last 3 sessions, price above both |
-| Momentum | `breakout` | New 55-day closing high on ≥1.5× average volume |
-| Momentum | `rel_strength` | 3-month return in the top decile of the universe, above SMA20 |
-| Mean reversion | `pullback` | Uptrend intact (above SMA150, SMA50 rising), RSI < 40, within 3% of SMA50 |
-| Mean reversion | `oversold_bounce` | Close below the lower Bollinger band, rising SMA50, green reversal day |
-| Vol/volume | `volume_spike` | Volume ≥ 2.5× its 20-day average on an up day |
-| Vol/volume | `squeeze` | Bollinger bandwidth in the lowest decile of 6 months, above SMA50 |
+| Trending up | `ma_crossover` | The 20-day average price just rose above the 50-day — often the start of a new climb |
+| Trending up | `breakout` | Highest close in 55 trading days, on well-above-average volume |
+| Trending up | `rel_strength` | 3-month gain in the top 10% of all stocks tracked, and still above its short-term trend |
+| Buy the dip | `pullback` | A steady climber resting at its usual support (above the 150-day average, RSI < 40, near the 50-day) |
+| Buy the dip | `oversold_bounce` | Fell below its normal Bollinger range, then closed higher — first hint of a rebound |
+| Unusual activity | `volume_spike` | 2.5× normal volume on a rising day |
+| Unusual activity | `squeeze` | Quietest trading range in six months while still above trend — calm that often precedes a sharp move |
 
-Each setup gets an ATR-based trade plan: entry at close, stop 1.5×ATR below,
-target 2.5×ATR above (≈1.67 reward:risk), plus a confluence score
-(number of signals + relative-strength percentile).
+Each flagged stock gets a trade plan sized to its own volatility (ATR):
+buy at the last close, stop 1.5×ATR below, target 2.5×ATR above — roughly a
+1.7-to-1 reward-to-risk. A **rank** rewards stocks where several independent
+signals agree and recent performance is strong. The published list keeps the
+top 120 overall plus the best 15 from every family, so quieter families are
+never crowded out.
 
-## Run locally
+## How it's put together
+
+1. `.github/workflows/scan.yml` — the schedule. Refreshes index constituent
+   lists from Wikipedia, runs the scan, commits `datagithubjson`, builds the
+   dashboard and deploys it to GitHub Pages.
+2. `screener/signals.py` — the indicator and signal library (pure pandas/numpy:
+   SMA, Wilder RSI, ATR, Bollinger bands, and the seven checks above).
+3. `screener/sthubpy` — downloads prices via yfinance, runs every check,
+   ranks the results, writes `datagithubjson`.
+4. `dashboard/template.html` + `dashboard/build_dashboardbpy` — inject the JSON
+   into a self-contained HTML page at `site/index.html`.
+
+## Run it yourself
 
 ```bash
 pip install -r requirements.txt
-python screener/scan.py        # writes data/scan.json
+python screener/sthubpy                 # writes datagithubjson (~2 min)
+python dashboard/build_dashboardbpy     # writes site/index.html — open in a browser
 ```
 
-## How the pieces fit
-
-1. `.github/workflows/scan.yml` — runs Tue–Sat at 05:45 UTC (after the US close),
-   refreshes constituent lists from Wikipedia, runs the scan, commits `data/scan.json`.
-2. `screener/signals.py` — the indicator + signal library (pure pandas/numpy).
-3. `screener/scan.py` — downloads data via yfinance and orchestrates the scan.
-4. `dashboard/build_dashboard.py` — turns `scan.json` + `dashboard/template.html`
-   into a self-contained HTML dashboard.
-
-> Not financial advice — a screening tool that surfaces candidates for further
-> analysis, nothing more.
+> **Not financial advice.** This is a mechanical screen of end-of-day data — it
+> tells you where to look, not what to buy. Check the chart, the news and your
+> position sizing before trading anything.
