@@ -1,0 +1,355 @@
+<title>Signal Desk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef0f4;
+    --ink: #14171e;
+    --ink-2: #5b6472;
+    --ink-3: #8a93a3;
+    --line: #e2e5eb;
+    --accent: #2a78d6;
+    --mom: #2a78d6;      /* momentum */
+    --rev: #c98500;      /* mean reversion */
+    --vol: #4a3aa7;      /* volume & volatility */
+    --mom-bg: #2a78d61a; --rev-bg: #c985001f; --vol-bg: #4a3aa716;
+    --up: #0a7a35;
+    --down: #c23838;
+    --shadow: 0 1px 2px #14171e0d, 0 4px 16px #14171e0a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101319;
+      --surface: #171b23;
+      --surface-2: #1f2530;
+      --ink: #e8eaef;
+      --ink-2: #9aa3b2;
+      --ink-3: #6b7484;
+      --line: #262c38;
+      --accent: #3987e5;
+      --mom: #3987e5; --rev: #c98500; --vol: #9085e9;
+      --mom-bg: #3987e526; --rev-bg: #c9850026; --vol-bg: #9085e922;
+      --up: #35b96a;
+      --down: #e06060;
+      --shadow: 0 1px 2px #0006, 0 6px 20px #0004;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101319;
+    --surface: #171b23;
+    --surface-2: #1f2530;
+    --ink: #e8eaef;
+    --ink-2: #9aa3b2;
+    --ink-3: #6b7484;
+    --line: #262c38;
+    --accent: #3987e5;
+    --mom: #3987e5; --rev: #c98500; --vol: #9085e9;
+    --mom-bg: #3987e526; --rev-bg: #c9850026; --vol-bg: #9085e922;
+    --up: #35b96a;
+    --down: #e06060;
+    --shadow: 0 1px 2px #0006, 0 6px 20px #0004;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px; line-height: 1.45;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* masthead */
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; margin-bottom: 22px; }
+  h1 {
+    margin: 0; font-family: "Archivo", sans-serif; font-stretch: 115%;
+    font-weight: 800; font-size: 26px; letter-spacing: .01em; text-wrap: balance;
+  }
+  .stamp { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-2); }
+  .stamp b { color: var(--ink); font-weight: 600; }
+  .badge-sample {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em;
+    color: var(--rev); border: 1px solid var(--rev); border-radius: 3px; padding: 2px 7px;
+  }
+
+  /* stat tiles */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px 10px; cursor: pointer; text-align: left; font: inherit; color: inherit;
+    border-left: 3px solid var(--line); transition: border-color .15s;
+  }
+  .tile:hover { border-color: var(--ink-3); }
+  .tile:focus-visible, .chip:focus-visible, th.sortable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tile.on { border-left-color: var(--tc, var(--accent)); background: var(--surface); box-shadow: var(--shadow); }
+  .tile .k { display: block; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  .tile .v { display: block; font-family: "IBM Plex Mono", monospace; font-size: 24px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .tile .v small { font-size: 12px; color: var(--ink-3); font-weight: 400; }
+
+  /* filters */
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .chip {
+    font: 500 12.5px "IBM Plex Mono", monospace; padding: 5px 11px; border-radius: 15px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer;
+  }
+  .chip.on { border-color: var(--accent); color: var(--accent); background: var(--mom-bg); }
+  .filters input {
+    font: 13px "IBM Plex Mono", monospace; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+    padding: 6px 10px; width: 150px; margin-left: auto;
+  }
+  .filters input::placeholder { color: var(--ink-3); }
+
+  /* table */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-2); font-weight: 500;
+    text-align: right; padding: 10px 10px; border-bottom: 1px solid var(--line);
+    white-space: nowrap; position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  th.l { text-align: left; }
+  th.sortable { cursor: pointer; }
+  th.sortable:hover, th.sorted { color: var(--ink); }
+  th.sorted::after { content: " ▾"; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap;
+       font-family: "IBM Plex Mono", monospace; font-size: 13px; font-variant-numeric: tabular-nums; }
+  td.l { text-align: left; }
+  tr.setup { cursor: pointer; }
+  tr.setup:hover td { background: var(--surface-2); }
+  tr:last-child td { border-bottom: 0; }
+  .tick { font-weight: 600; font-size: 13.5px; }
+  .co { font-family: "Archivo", sans-serif; color: var(--ink-2); font-size: 12.5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+  .uni { font-size: 10.5px; color: var(--ink-3); letter-spacing: .04em; }
+  .up { color: var(--up); } .down { color: var(--down); }
+  .sigchip {
+    display: inline-block; font-size: 10.5px; font-weight: 500; letter-spacing: .03em;
+    border-radius: 3px; padding: 2px 6px; margin-left: 4px;
+  }
+  .f-momentum { color: var(--mom); background: var(--mom-bg); }
+  .f-mean_reversion { color: var(--rev); background: var(--rev-bg); }
+  .f-vol_volume { color: var(--vol); background: var(--vol-bg); }
+  .spark { display: block; }
+  .spark polyline { fill: none; stroke: var(--ink-3); stroke-width: 1.5; }
+  .spark .fill { fill: var(--ink-3); opacity: .12; stroke: none; }
+  .spark circle { fill: var(--ink); }
+
+  /* expanded detail */
+  tr.detail td { background: var(--surface-2); text-align: left; white-space: normal; padding: 14px 16px; }
+  .plan { display: flex; flex-wrap: wrap; gap: 22px; margin-bottom: 10px; }
+  .plan div { font-family: "IBM Plex Mono", monospace; font-size: 13px; }
+  .plan .k { display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  .whys { margin: 0; padding: 0; list-style: none; }
+  .whys li { font-family: "Archivo", sans-serif; font-size: 13.5px; color: var(--ink); padding: 2px 0; }
+  .whys .dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 8px; }
+
+  .empty { padding: 40px; text-align: center; color: var(--ink-2); font-family: "Archivo", sans-serif; }
+  footer { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); max-width: 65ch; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Signal Desk</h1>
+    <span class="stamp">scan <b id="scanDate">—</b> · <span id="scanMeta"></span></span>
+    <span id="sampleBadge" class="badge-sample" hidden>SAMPLE DATA</span>
+  </header>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="filters" id="uniFilters">
+    <span class="stamp">universe</span>
+  </div>
+  <div class="filters" style="margin-top:-6px">
+    <span class="stamp">search</span>
+    <input id="q" type="search" placeholder="ticker or name" style="margin-left:0">
+  </div>
+
+  <div class="card">
+    <table id="tbl" aria-label="Swing setups">
+      <thead><tr id="headRow"></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden>No setups match the current filters.</div>
+  </div>
+
+  <footer>
+    Screening output, not financial advice. Signals are mechanical pattern flags on
+    end-of-day data — always check the chart, news and position sizing before acting.
+    Trade plans are ATR-based defaults (stop 1.5×ATR, target 2.5×ATR).
+  </footer>
+</div>
+
+<script>
+const DATA = /*__SCAN_DATA__*/;
+
+const FAM = {
+  momentum:       { label: "Momentum",   cls: "f-momentum",       varName: "--mom" },
+  mean_reversion: { label: "Mean rev",   cls: "f-mean_reversion", varName: "--rev" },
+  vol_volume:     { label: "Vol/volume", cls: "f-vol_volume",     varName: "--vol" },
+};
+const SIG_LABEL = {
+  ma_crossover: "MA cross", breakout: "Breakout", rel_strength: "Rel strength",
+  pullback: "Pullback", oversold_bounce: "Oversold bounce",
+  volume_spike: "Volume spike", squeeze: "Squeeze",
+};
+const UNI_LABEL = { sp500: "S&P 500", nasdaq100: "NDX", both_us: "S&P+NDX", ftse100: "FTSE" };
+
+const state = { fam: null, unis: new Set(), q: "", sort: "score", dir: -1, open: null };
+
+// ---------- header ----------
+document.getElementById("scanDate").textContent = (DATA.generated_utc || "").slice(0, 10);
+document.getElementById("scanMeta").textContent =
+  `${DATA.scanned}/${DATA.universe_size} tickers scanned · ${DATA.setups.length} setups`;
+if (DATA.sample) document.getElementById("sampleBadge").hidden = false;
+
+// ---------- stat tiles (family filters) ----------
+const tilesEl = document.getElementById("tiles");
+function renderTiles() {
+  tilesEl.innerHTML = "";
+  const all = document.createElement("button");
+  all.className = "tile" + (state.fam === null ? " on" : "");
+  all.innerHTML = `<span class="k">All setups</span><span class="v">${DATA.setups.length}</span>`;
+  all.onclick = () => { state.fam = null; refresh(); };
+  tilesEl.appendChild(all);
+  for (const [key, f] of Object.entries(FAM)) {
+    const b = document.createElement("button");
+    b.className = "tile" + (state.fam === key ? " on" : "");
+    b.style.setProperty("--tc", `var(${f.varName})`);
+    b.innerHTML = `<span class="k">${f.label}</span><span class="v">${DATA.counts[key] ?? 0}<small> setups</small></span>`;
+    b.onclick = () => { state.fam = state.fam === key ? null : key; refresh(); };
+    tilesEl.appendChild(b);
+  }
+}
+
+// ---------- universe chips ----------
+const uniEl = document.getElementById("uniFilters");
+const presentUnis = [...new Set(DATA.setups.map(s => s.universe))];
+for (const u of ["sp500", "both_us", "nasdaq100", "ftse100"]) {
+  if (!presentUnis.includes(u)) continue;
+  const c = document.createElement("button");
+  c.className = "chip"; c.textContent = UNI_LABEL[u] || u;
+  c.onclick = () => {
+    state.unis.has(u) ? state.unis.delete(u) : state.unis.add(u);
+    c.classList.toggle("on"); refresh();
+  };
+  uniEl.appendChild(c);
+}
+
+document.getElementById("q").addEventListener("input", e => {
+  state.q = e.target.value.trim().toLowerCase(); refresh();
+});
+
+// ---------- table ----------
+const COLS = [
+  { key: "ticker", label: "Ticker", left: true },
+  { key: "spark",  label: "60d",    sort: false },
+  { key: "close",  label: "Close" },
+  { key: "chg_1d", label: "1d %" },
+  { key: "rsi",    label: "RSI" },
+  { key: "rs_pct", label: "RS %" },
+  { key: "signals",label: "Signals", left: true, sort: false },
+  { key: "stop",   label: "Stop" },
+  { key: "target", label: "Target" },
+  { key: "rr",     label: "R:R" },
+  { key: "score",  label: "Score" },
+];
+const headRow = document.getElementById("headRow");
+for (const c of COLS) {
+  const th = document.createElement("th");
+  th.textContent = c.label;
+  if (c.left) th.classList.add("l");
+  if (c.sort !== false) {
+    th.classList.add("sortable"); th.tabIndex = 0;
+    const doSort = () => {
+      state.dir = state.sort === c.key ? -state.dir : -1;
+      state.sort = c.key; refresh();
+    };
+    th.onclick = doSort;
+    th.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); doSort(); } };
+  }
+  headRow.appendChild(th);
+}
+
+function sparkline(vals) {
+  const w = 90, h = 30, min = Math.min(...vals), max = Math.max(...vals);
+  const span = max - min || 1;
+  const pts = vals.map((v, i) =>
+    `${(i / (vals.length - 1) * w).toFixed(1)},${(h - 3 - (v - min) / span * (h - 6)).toFixed(1)}`);
+  const lastY = (h - 3 - (vals[vals.length - 1] - min) / span * (h - 6)).toFixed(1);
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="60 day price line">
+    <polygon class="fill" points="0,${h} ${pts.join(" ")} ${w},${h}"></polygon>
+    <polyline points="${pts.join(" ")}"></polyline>
+    <circle cx="${w}" cy="${lastY}" r="2.4"></circle></svg>`;
+}
+
+function visible() {
+  let rows = DATA.setups.filter(s =>
+    (state.fam === null || s.families.includes(state.fam)) &&
+    (state.unis.size === 0 || state.unis.has(s.universe)) &&
+    (state.q === "" || s.ticker.toLowerCase().includes(state.q) || (s.name || "").toLowerCase().includes(state.q))
+  );
+  const k = state.sort;
+  rows.sort((a, b) => {
+    const av = a[k], bv = b[k];
+    if (typeof av === "string") return state.dir * av.localeCompare(bv);
+    return state.dir * ((av ?? -1e9) - (bv ?? -1e9));
+  });
+  return rows;
+}
+
+function fmtChg(v) {
+  const cls = v > 0 ? "up" : v < 0 ? "down" : "";
+  return `<span class="${cls}">${v > 0 ? "+" : ""}${v.toFixed(2)}%</span>`;
+}
+
+const rowsEl = document.getElementById("rows");
+function renderRows() {
+  const rows = visible();
+  document.getElementById("empty").hidden = rows.length > 0;
+  rowsEl.innerHTML = "";
+  for (const s of rows) {
+    const tr = document.createElement("tr");
+    tr.className = "setup";
+    const chips = s.signals.map(x =>
+      `<span class="sigchip ${FAM[x.family].cls}">${SIG_LABEL[x.signal] || x.signal}</span>`).join("");
+    tr.innerHTML =
+      `<td class="l"><span class="tick">${s.ticker}</span> <span class="uni">${UNI_LABEL[s.universe] || ""}</span><div class="co">${s.name || ""}</div></td>` +
+      `<td>${sparkline(s.spark)}</td>` +
+      `<td>${s.close.toFixed(2)}</td>` +
+      `<td>${fmtChg(s.chg_1d)}</td>` +
+      `<td>${s.rsi ?? "—"}</td>` +
+      `<td>${s.rs_pct}</td>` +
+      `<td class="l">${chips}</td>` +
+      `<td>${s.stop.toFixed(2)}</td>` +
+      `<td>${s.target.toFixed(2)}</td>` +
+      `<td>${s.rr.toFixed(2)}</td>` +
+      `<td><b>${s.score.toFixed(2)}</b></td>`;
+    tr.onclick = () => { state.open = state.open === s.ticker ? null : s.ticker; renderRows(); };
+    rowsEl.appendChild(tr);
+    if (state.open === s.ticker) {
+      const dt = document.createElement("tr");
+      dt.className = "detail";
+      const whys = s.signals.map(x =>
+        `<li><span class="dot ${FAM[x.family].cls}" style="background:var(${FAM[x.family].varName})"></span>` +
+        `<b>${SIG_LABEL[x.signal] || x.signal}</b> — ${x.detail}</li>`).join("");
+      dt.innerHTML = `<td colspan="${COLS.length}">
+        <div class="plan">
+          <div><span class="k">Entry</span>${s.entry.toFixed(2)}</div>
+          <div><span class="k">Stop</span>${s.stop.toFixed(2)}</div>
+          <div><span class="k">Target</span>${s.target.toFixed(2)}</div>
+          <div><span class="k">ATR14</span>${s.atr.toFixed(2)}</div>
+          <div><span class="k">Reward:risk</span>${s.rr.toFixed(2)}</div>
+          <div><span class="k">RS percentile</span>${s.rs_pct}</div>
+        </div>
+        <ul class="whys">${whys}</ul></td>`;
+      rowsEl.appendChild(dt);
+    }
+  }
+  // sorted indicator
+  [...headRow.children].forEach((th, i) => th.classList.toggle("sorted", COLS[i].key === state.sort));
+}
+
+function refresh() { renderTiles(); renderRows(); }
+refresh();
+</script>
