@@ -1,5 +1,5 @@
 {
- "generated_utc": "2026-08-27T23:46:24+00:00",
+ "generated_utc": "2026-08-28T00:03:50+00:00",
  "period": {
   "start": "2022-04-14",
   "end": "2026-08-25"
@@ -11,13 +11,29 @@
   "cost_per_side_pct": 0.1
  },
  "tickers_tested": 605,
- "total_trades": 67657,
+ "total_trades": 67658,
  "baseline": {
   "trades": 20000,
   "win_rate": 42.7,
   "avg_r": 0.042,
   "median_r": -1.03,
   "profit_factor": 1.07
+ },
+ "regime_overall": {
+  "risk_on": {
+   "trades": 55341,
+   "win_rate": 42.5,
+   "avg_r": 0.038,
+   "median_r": -1.032,
+   "profit_factor": 1.06
+  },
+  "risk_off": {
+   "trades": 12317,
+   "win_rate": 39.1,
+   "avg_r": -0.055,
+   "median_r": -1.033,
+   "profit_factor": 0.91
+  }
  },
  "by_signal": {
   "breakout": {
@@ -31,19 +47,53 @@
     "stop": 3815,
     "target": 2479,
     "time": 651
+   },
+   "p_value": 0.915,
+   "regime": {
+    "risk_on": {
+     "trades": 6195,
+     "win_rate": 41.9,
+     "avg_r": 0.028,
+     "median_r": -1.033,
+     "profit_factor": 1.05
+    },
+    "risk_off": {
+     "trades": 750,
+     "win_rate": 39.9,
+     "avg_r": -0.057,
+     "median_r": -1.033,
+     "profit_factor": 0.91
+    }
    }
   },
   "ma_crossover": {
-   "trades": 30096,
+   "trades": 30097,
    "win_rate": 41.6,
    "avg_r": 0.012,
    "median_r": -1.034,
    "profit_factor": 1.02,
    "avg_hold": 8.6,
    "exit_mix": {
-    "stop": 16700,
+    "stop": 16701,
     "target": 10787,
     "time": 2609
+   },
+   "p_value": 0.996,
+   "regime": {
+    "risk_on": {
+     "trades": 25120,
+     "win_rate": 42.7,
+     "avg_r": 0.04,
+     "median_r": -1.033,
+     "profit_factor": 1.07
+    },
+    "risk_off": {
+     "trades": 4977,
+     "win_rate": 35.9,
+     "avg_r": -0.133,
+     "median_r": -1.036,
+     "profit_factor": 0.79
+    }
    }
   },
   "oversold_bounce": {
@@ -54,9 +104,26 @@
    "profit_factor": 1.11,
    "avg_hold": 9.3,
    "exit_mix": {
-    "stop": 3308,
-    "target": 2290,
+    "stop": 3309,
+    "target": 2289,
     "time": 719
+   },
+   "p_value": 0.12,
+   "regime": {
+    "risk_on": {
+     "trades": 4627,
+     "win_rate": 43.7,
+     "avg_r": 0.06,
+     "median_r": -1.026,
+     "profit_factor": 1.11
+    },
+    "risk_off": {
+     "trades": 1690,
+     "win_rate": 44.2,
+     "avg_r": 0.075,
+     "median_r": -1.025,
+     "profit_factor": 1.13
+    }
    }
   },
   "pullback": {
@@ -70,6 +137,23 @@
     "stop": 1358,
     "target": 905,
     "time": 218
+   },
+   "p_value": 0.737,
+   "regime": {
+    "risk_on": {
+     "trades": 2008,
+     "win_rate": 42.5,
+     "avg_r": 0.03,
+     "median_r": -1.042,
+     "profit_factor": 1.05
+    },
+    "risk_off": {
+     "trades": 473,
+     "win_rate": 42.3,
+     "avg_r": 0.007,
+     "median_r": -1.04,
+     "profit_factor": 1.01
+    }
    }
   },
   "rel_strength": {
@@ -83,6 +167,23 @@
     "stop": 3138,
     "target": 2121,
     "time": 500
+   },
+   "p_value": 0.448,
+   "regime": {
+    "risk_on": {
+     "trades": 4382,
+     "win_rate": 43.6,
+     "avg_r": 0.078,
+     "median_r": -1.023,
+     "profit_factor": 1.14
+    },
+    "risk_off": {
+     "trades": 1377,
+     "win_rate": 38.4,
+     "avg_r": -0.061,
+     "median_r": -1.03,
+     "profit_factor": 0.9
+    }
    }
   },
   "squeeze": {
@@ -96,6 +197,23 @@
     "stop": 5755,
     "target": 3601,
     "time": 648
+   },
+   "p_value": 1.0,
+   "regime": {
+    "risk_on": {
+     "trades": 8099,
+     "win_rate": 40.6,
+     "avg_r": -0.002,
+     "median_r": -1.042,
+     "profit_factor": 1.0
+    },
+    "risk_off": {
+     "trades": 1905,
+     "win_rate": 37.7,
+     "avg_r": -0.083,
+     "median_r": -1.037,
+     "profit_factor": 0.87
+    }
    }
   },
   "volume_spike": {
@@ -109,19 +227,36 @@
     "stop": 3181,
     "target": 2178,
     "time": 696
+   },
+   "p_value": 0.118,
+   "regime": {
+    "risk_on": {
+     "trades": 4910,
+     "win_rate": 43.3,
+     "avg_r": 0.051,
+     "median_r": -1.027,
+     "profit_factor": 1.09
+    },
+    "risk_off": {
+     "trades": 1145,
+     "win_rate": 46.0,
+     "avg_r": 0.122,
+     "median_r": -1.012,
+     "profit_factor": 1.23
+    }
    }
   }
  },
  "by_year": {
   "2022": {
-   "trades": 9174,
+   "trades": 9173,
    "win_rate": 33.4,
    "avg_r": -0.198,
    "median_r": -1.037,
    "profit_factor": 0.71
   },
   "2023": {
-   "trades": 15458,
+   "trades": 15460,
    "win_rate": 41.7,
    "avg_r": 0.016,
    "median_r": -1.038,
