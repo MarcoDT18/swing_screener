@@ -1,5 +1,5 @@
 {
- "generated_utc": "2026-08-28T00:03:50+00:00",
+ "generated_utc": "2026-08-28T00:30:22+00:00",
  "period": {
   "start": "2022-04-14",
   "end": "2026-08-25"
@@ -8,280 +8,452 @@
   "hold_days": 20,
   "atr_stop": 1.5,
   "atr_target": 2.5,
-  "cost_per_side_pct": 0.1
+  "cost_per_side_pct": 0.1,
+  "liquidity_min_usd": 5000000.0,
+  "liquidity_min_gbp": 2000000.0,
+  "sleeve": {
+   "hold_days": 60,
+   "atr_stop": 3.0,
+   "target": "none (trend-following exit)"
+  }
  },
  "tickers_tested": 605,
- "total_trades": 67658,
+ "total_trades": 48870,
  "baseline": {
-  "trades": 20000,
+  "trades": 12000,
   "win_rate": 42.7,
-  "avg_r": 0.042,
+  "avg_r": 0.041,
   "median_r": -1.03,
   "profit_factor": 1.07
  },
  "regime_overall": {
   "risk_on": {
-   "trades": 55341,
-   "win_rate": 42.5,
-   "avg_r": 0.038,
-   "median_r": -1.032,
+   "trades": 39611,
+   "win_rate": 42.0,
+   "avg_r": 0.033,
+   "median_r": -1.033,
    "profit_factor": 1.06
   },
   "risk_off": {
-   "trades": 12317,
-   "win_rate": 39.1,
-   "avg_r": -0.055,
-   "median_r": -1.033,
-   "profit_factor": 0.91
+   "trades": 9259,
+   "win_rate": 39.5,
+   "avg_r": -0.041,
+   "median_r": -1.031,
+   "profit_factor": 0.93
   }
  },
  "by_signal": {
   "breakout": {
-   "trades": 6945,
-   "win_rate": 41.7,
-   "avg_r": 0.018,
-   "median_r": -1.033,
-   "profit_factor": 1.03,
-   "avg_hold": 8.4,
-   "exit_mix": {
-    "stop": 3815,
-    "target": 2479,
-    "time": 651
-   },
-   "p_value": 0.915,
+   "trades": 5823,
+   "win_rate": 42.0,
+   "avg_r": 0.024,
+   "median_r": -1.034,
+   "profit_factor": 1.04,
+   "hold": 20,
+   "baseline_avg_r": 0.041,
+   "p_value": 0.8,
    "regime": {
     "risk_on": {
-     "trades": 6195,
-     "win_rate": 41.9,
-     "avg_r": 0.028,
-     "median_r": -1.033,
-     "profit_factor": 1.05
+     "trades": 5149,
+     "win_rate": 42.2,
+     "avg_r": 0.034,
+     "median_r": -1.034,
+     "profit_factor": 1.06
     },
     "risk_off": {
-     "trades": 750,
-     "win_rate": 39.9,
-     "avg_r": -0.057,
-     "median_r": -1.033,
-     "profit_factor": 0.91
+     "trades": 674,
+     "win_rate": 40.2,
+     "avg_r": -0.048,
+     "median_r": -1.032,
+     "profit_factor": 0.92
     }
    }
   },
   "ma_crossover": {
-   "trades": 30097,
-   "win_rate": 41.6,
-   "avg_r": 0.012,
-   "median_r": -1.034,
-   "profit_factor": 1.02,
-   "avg_hold": 8.6,
-   "exit_mix": {
-    "stop": 16701,
-    "target": 10787,
-    "time": 2609
-   },
-   "p_value": 0.996,
+   "trades": 17437,
+   "win_rate": 40.6,
+   "avg_r": -0.011,
+   "median_r": -1.037,
+   "profit_factor": 0.98,
+   "hold": 20,
+   "baseline_avg_r": 0.041,
+   "p_value": 1.0,
    "regime": {
     "risk_on": {
-     "trades": 25120,
-     "win_rate": 42.7,
-     "avg_r": 0.04,
-     "median_r": -1.033,
-     "profit_factor": 1.07
+     "trades": 14303,
+     "win_rate": 41.5,
+     "avg_r": 0.01,
+     "median_r": -1.037,
+     "profit_factor": 1.02
     },
     "risk_off": {
-     "trades": 4977,
-     "win_rate": 35.9,
-     "avg_r": -0.133,
-     "median_r": -1.036,
-     "profit_factor": 0.79
+     "trades": 3134,
+     "win_rate": 36.9,
+     "avg_r": -0.107,
+     "median_r": -1.037,
+     "profit_factor": 0.83
+    }
+   }
+  },
+  "momentum_6m": {
+   "trades": 966,
+   "win_rate": 44.5,
+   "avg_r": 0.374,
+   "median_r": -0.5,
+   "profit_factor": 1.72,
+   "hold": 60,
+   "baseline_avg_r": 0.252,
+   "p_value": 0.022,
+   "regime": {
+    "risk_on": {
+     "trades": 713,
+     "win_rate": 45.7,
+     "avg_r": 0.497,
+     "median_r": -0.427,
+     "profit_factor": 1.97
+    },
+    "risk_off": {
+     "trades": 253,
+     "win_rate": 41.1,
+     "avg_r": 0.027,
+     "median_r": -0.598,
+     "profit_factor": 1.05
     }
    }
   },
   "oversold_bounce": {
-   "trades": 6317,
+   "trades": 5178,
    "win_rate": 43.8,
-   "avg_r": 0.064,
+   "avg_r": 0.066,
    "median_r": -1.026,
-   "profit_factor": 1.11,
-   "avg_hold": 9.3,
-   "exit_mix": {
-    "stop": 3309,
-    "target": 2289,
-    "time": 719
-   },
-   "p_value": 0.12,
+   "profit_factor": 1.12,
+   "hold": 20,
+   "baseline_avg_r": 0.041,
+   "p_value": 0.116,
    "regime": {
     "risk_on": {
-     "trades": 4627,
-     "win_rate": 43.7,
-     "avg_r": 0.06,
-     "median_r": -1.026,
-     "profit_factor": 1.11
-    },
-    "risk_off": {
-     "trades": 1690,
-     "win_rate": 44.2,
-     "avg_r": 0.075,
+     "trades": 3863,
+     "win_rate": 44.1,
+     "avg_r": 0.073,
      "median_r": -1.025,
      "profit_factor": 1.13
+    },
+    "risk_off": {
+     "trades": 1315,
+     "win_rate": 42.9,
+     "avg_r": 0.046,
+     "median_r": -1.027,
+     "profit_factor": 1.08
     }
    }
   },
   "pullback": {
-   "trades": 2481,
-   "win_rate": 42.5,
-   "avg_r": 0.025,
+   "trades": 2305,
+   "win_rate": 42.0,
+   "avg_r": 0.014,
    "median_r": -1.042,
-   "profit_factor": 1.04,
-   "avg_hold": 8.6,
-   "exit_mix": {
-    "stop": 1358,
-    "target": 905,
-    "time": 218
-   },
-   "p_value": 0.737,
+   "profit_factor": 1.02,
+   "hold": 20,
+   "baseline_avg_r": 0.041,
+   "p_value": 0.826,
    "regime": {
     "risk_on": {
-     "trades": 2008,
-     "win_rate": 42.5,
-     "avg_r": 0.03,
+     "trades": 1861,
+     "win_rate": 42.1,
+     "avg_r": 0.021,
      "median_r": -1.042,
-     "profit_factor": 1.05
+     "profit_factor": 1.03
     },
     "risk_off": {
-     "trades": 473,
-     "win_rate": 42.3,
-     "avg_r": 0.007,
-     "median_r": -1.04,
-     "profit_factor": 1.01
+     "trades": 444,
+     "win_rate": 41.7,
+     "avg_r": -0.013,
+     "median_r": -1.041,
+     "profit_factor": 0.98
     }
    }
   },
   "rel_strength": {
-   "trades": 5759,
-   "win_rate": 42.4,
-   "avg_r": 0.045,
-   "median_r": -1.025,
-   "profit_factor": 1.08,
-   "avg_hold": 8.5,
-   "exit_mix": {
-    "stop": 3138,
-    "target": 2121,
-    "time": 500
-   },
-   "p_value": 0.448,
+   "trades": 3708,
+   "win_rate": 42.0,
+   "avg_r": 0.034,
+   "median_r": -1.026,
+   "profit_factor": 1.06,
+   "hold": 20,
+   "baseline_avg_r": 0.041,
+   "p_value": 0.617,
    "regime": {
     "risk_on": {
-     "trades": 4382,
-     "win_rate": 43.6,
-     "avg_r": 0.078,
-     "median_r": -1.023,
-     "profit_factor": 1.14
+     "trades": 2794,
+     "win_rate": 42.9,
+     "avg_r": 0.059,
+     "median_r": -1.024,
+     "profit_factor": 1.1
     },
     "risk_off": {
-     "trades": 1377,
-     "win_rate": 38.4,
-     "avg_r": -0.061,
-     "median_r": -1.03,
-     "profit_factor": 0.9
+     "trades": 914,
+     "win_rate": 39.2,
+     "avg_r": -0.042,
+     "median_r": -1.031,
+     "profit_factor": 0.93
     }
    }
   },
   "squeeze": {
-   "trades": 10004,
-   "win_rate": 40.1,
-   "avg_r": -0.018,
-   "median_r": -1.04,
-   "profit_factor": 0.97,
-   "avg_hold": 7.9,
-   "exit_mix": {
-    "stop": 5755,
-    "target": 3601,
-    "time": 648
-   },
+   "trades": 7939,
+   "win_rate": 39.7,
+   "avg_r": -0.03,
+   "median_r": -1.042,
+   "profit_factor": 0.95,
+   "hold": 20,
+   "baseline_avg_r": 0.041,
    "p_value": 1.0,
    "regime": {
     "risk_on": {
-     "trades": 8099,
-     "win_rate": 40.6,
-     "avg_r": -0.002,
-     "median_r": -1.042,
-     "profit_factor": 1.0
+     "trades": 6452,
+     "win_rate": 40.3,
+     "avg_r": -0.014,
+     "median_r": -1.043,
+     "profit_factor": 0.98
     },
     "risk_off": {
-     "trades": 1905,
-     "win_rate": 37.7,
-     "avg_r": -0.083,
-     "median_r": -1.037,
-     "profit_factor": 0.87
+     "trades": 1487,
+     "win_rate": 37.0,
+     "avg_r": -0.1,
+     "median_r": -1.038,
+     "profit_factor": 0.84
     }
    }
   },
   "volume_spike": {
-   "trades": 6055,
-   "win_rate": 43.8,
+   "trades": 5514,
+   "win_rate": 43.7,
    "avg_r": 0.064,
-   "median_r": -1.024,
+   "median_r": -1.025,
    "profit_factor": 1.11,
-   "avg_hold": 9.0,
-   "exit_mix": {
-    "stop": 3181,
-    "target": 2178,
-    "time": 696
-   },
-   "p_value": 0.118,
+   "hold": 20,
+   "baseline_avg_r": 0.041,
+   "p_value": 0.13,
    "regime": {
     "risk_on": {
-     "trades": 4910,
+     "trades": 4476,
      "win_rate": 43.3,
-     "avg_r": 0.051,
+     "avg_r": 0.053,
      "median_r": -1.027,
      "profit_factor": 1.09
     },
     "risk_off": {
-     "trades": 1145,
-     "win_rate": 46.0,
-     "avg_r": 0.122,
-     "median_r": -1.012,
-     "profit_factor": 1.23
+     "trades": 1038,
+     "win_rate": 45.5,
+     "avg_r": 0.112,
+     "median_r": -1.017,
+     "profit_factor": 1.21
     }
    }
   }
  },
  "by_year": {
   "2022": {
-   "trades": 9173,
-   "win_rate": 33.4,
-   "avg_r": -0.198,
-   "median_r": -1.037,
+   "trades": 7033,
+   "win_rate": 33.6,
+   "avg_r": -0.195,
+   "median_r": -1.036,
    "profit_factor": 0.71
   },
   "2023": {
-   "trades": 15460,
-   "win_rate": 41.7,
-   "avg_r": 0.016,
+   "trades": 11294,
+   "win_rate": 41.9,
+   "avg_r": 0.035,
    "median_r": -1.038,
-   "profit_factor": 1.03
+   "profit_factor": 1.06
   },
   "2024": {
-   "trades": 17863,
-   "win_rate": 45.1,
-   "avg_r": 0.105,
-   "median_r": -1.03,
-   "profit_factor": 1.18
+   "trades": 12803,
+   "win_rate": 44.0,
+   "avg_r": 0.081,
+   "median_r": -1.033,
+   "profit_factor": 1.14
   },
   "2025": {
-   "trades": 15097,
-   "win_rate": 42.9,
-   "avg_r": 0.045,
-   "median_r": -1.032,
-   "profit_factor": 1.08
+   "trades": 10998,
+   "win_rate": 43.3,
+   "avg_r": 0.059,
+   "median_r": -1.031,
+   "profit_factor": 1.1
   },
   "2026": {
-   "trades": 10065,
-   "win_rate": 42.6,
-   "avg_r": 0.044,
+   "trades": 6742,
+   "win_rate": 41.9,
+   "avg_r": 0.03,
    "median_r": -1.023,
-   "profit_factor": 1.08
+   "profit_factor": 1.05
+  }
+ },
+ "walkforward": {
+  "split_date": "2024-11-06",
+  "train_frac": 0.6,
+  "configs_tested": 24,
+  "signals": {
+   "breakout": {
+    "chosen_hold": 20,
+    "train": {
+     "trades": 3372,
+     "win_rate": 42.9,
+     "avg_r": 0.041,
+     "median_r": -1.035,
+     "profit_factor": 1.07
+    },
+    "test": {
+     "trades": 2451,
+     "win_rate": 40.6,
+     "avg_r": 0.002,
+     "median_r": -1.033,
+     "profit_factor": 1.0
+    },
+    "test_baseline_avg_r": 0.023,
+    "p_test": 0.754,
+    "p_adjusted": 1.0
+   },
+   "ma_crossover": {
+    "chosen_hold": 10,
+    "train": {
+     "trades": 10237,
+     "win_rate": 43.9,
+     "avg_r": -0.01,
+     "median_r": -0.527,
+     "profit_factor": 0.98
+    },
+    "test": {
+     "trades": 7200,
+     "win_rate": 43.6,
+     "avg_r": -0.012,
+     "median_r": -0.432,
+     "profit_factor": 0.98
+    },
+    "test_baseline_avg_r": 0.038,
+    "p_test": 0.992,
+    "p_adjusted": 1.0
+   },
+   "momentum_6m": {
+    "chosen_hold": 80,
+    "train": {
+     "trades": 532,
+     "win_rate": 38.3,
+     "avg_r": 0.457,
+     "median_r": -1.015,
+     "profit_factor": 1.75
+    },
+    "test": {
+     "trades": 434,
+     "win_rate": 40.6,
+     "avg_r": 0.255,
+     "median_r": -1.011,
+     "profit_factor": 1.45
+    },
+    "test_baseline_avg_r": 0.232,
+    "p_test": 0.402,
+    "p_adjusted": 1.0
+   },
+   "oversold_bounce": {
+    "chosen_hold": 20,
+    "train": {
+     "trades": 3151,
+     "win_rate": 44.1,
+     "avg_r": 0.075,
+     "median_r": -1.028,
+     "profit_factor": 1.13
+    },
+    "test": {
+     "trades": 2027,
+     "win_rate": 43.3,
+     "avg_r": 0.053,
+     "median_r": -1.023,
+     "profit_factor": 1.09
+    },
+    "test_baseline_avg_r": 0.023,
+    "p_test": 0.179,
+    "p_adjusted": 1.0
+   },
+   "pullback": {
+    "chosen_hold": 20,
+    "train": {
+     "trades": 1393,
+     "win_rate": 41.7,
+     "avg_r": 0.005,
+     "median_r": -1.045,
+     "profit_factor": 1.01
+    },
+    "test": {
+     "trades": 912,
+     "win_rate": 42.5,
+     "avg_r": 0.029,
+     "median_r": -1.037,
+     "profit_factor": 1.05
+    },
+    "test_baseline_avg_r": 0.023,
+    "p_test": 0.447,
+    "p_adjusted": 1.0
+   },
+   "rel_strength": {
+    "chosen_hold": 10,
+    "train": {
+     "trades": 2275,
+     "win_rate": 44.0,
+     "avg_r": 0.002,
+     "median_r": -0.433,
+     "profit_factor": 1.0
+    },
+    "test": {
+     "trades": 1433,
+     "win_rate": 49.1,
+     "avg_r": 0.121,
+     "median_r": -0.055,
+     "profit_factor": 1.26
+    },
+    "test_baseline_avg_r": 0.038,
+    "p_test": 0.008,
+    "p_adjusted": 0.192
+   },
+   "squeeze": {
+    "chosen_hold": 20,
+    "train": {
+     "trades": 5052,
+     "win_rate": 39.5,
+     "avg_r": -0.031,
+     "median_r": -1.042,
+     "profit_factor": 0.95
+    },
+    "test": {
+     "trades": 2887,
+     "win_rate": 40.1,
+     "avg_r": -0.029,
+     "median_r": -1.04,
+     "profit_factor": 0.95
+    },
+    "test_baseline_avg_r": 0.023,
+    "p_test": 0.962,
+    "p_adjusted": 1.0
+   },
+   "volume_spike": {
+    "chosen_hold": 20,
+    "train": {
+     "trades": 3188,
+     "win_rate": 42.3,
+     "avg_r": 0.028,
+     "median_r": -1.029,
+     "profit_factor": 1.05
+    },
+    "test": {
+     "trades": 2326,
+     "win_rate": 45.6,
+     "avg_r": 0.114,
+     "median_r": -1.019,
+     "profit_factor": 1.21
+    },
+    "test_baseline_avg_r": 0.023,
+    "p_test": 0.002,
+    "p_adjusted": 0.048
+   }
   }
  }
 }
