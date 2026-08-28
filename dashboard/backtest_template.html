@@ -90,10 +90,11 @@
 <script>
 const BT = /*__BT_DATA__*/;
 
-const FAM_OF = { ma_crossover:"mom", breakout:"mom", rel_strength:"mom",
+const FAM_OF = { ma_crossover:"mom", breakout:"mom", rel_strength:"mom", momentum_6m:"mom",
                  pullback:"rev", oversold_bounce:"rev",
                  volume_spike:"vol", squeeze:"vol" };
 const NAME = { ma_crossover:"New uptrend", breakout:"Breakout", rel_strength:"Market leader",
+               momentum_6m:"6-month momentum (sleeve)",
                pullback:"Dip in an uptrend", oversold_bounce:"Oversold, turning up",
                volume_spike:"Unusual volume", squeeze:"Coiled spring" };
 const FAML = { mom:"Trending up", rev:"Buy the dip", vol:"Unusual activity" };
@@ -109,7 +110,10 @@ if (!BT) {
   document.getElementById("meta").innerHTML =
     `<b>${BT.period.start}</b> → <b>${BT.period.end}</b> · ${BT.tickers_tested} stocks · ${BT.total_trades.toLocaleString()} simulated trades`;
   document.getElementById("rules").textContent =
-    `Rules for every simulated trade: enter at the next day's open after a signal; stop ${BT.rules.atr_stop}× the stock's average daily range below entry; target ${BT.rules.atr_target}× above; time exit after ${BT.rules.hold_days} sessions; ${BT.rules.cost_per_side_pct}% costs per side. When a day touched both stop and target, the stop is counted first (the pessimistic choice). Past patterns are no promise about future ones — this is analysis, not advice.`;
+    `Rules for every simulated trade: enter at the next day's open after a signal; stop ${BT.rules.atr_stop}× the stock's average daily range below entry; target ${BT.rules.atr_target}× above; time exit after ${BT.rules.hold_days} sessions; ${BT.rules.cost_per_side_pct}% costs per side. When a day touched both stop and target, the stop is counted first (the pessimistic choice).` +
+    (BT.rules.liquidity_min_usd ? ` Only stocks trading at least $${(BT.rules.liquidity_min_usd/1e6)}M / £${(BT.rules.liquidity_min_gbp/1e6)}M a day qualify.` : "") +
+    (BT.rules.sleeve ? ` The 6-month momentum sleeve uses its own trend-following exits: ${BT.rules.sleeve.hold_days}-session hold, ${BT.rules.sleeve.atr_stop}× ATR stop, no profit target.` : "") +
+    ` Past patterns are no promise about future ones — this is analysis, not advice.`;
 
   const base = BT.baseline;
   const sigs = Object.entries(BT.by_signal).sort((a,b) => b[1].avg_r - a[1].avg_r);
@@ -119,7 +123,7 @@ if (!BT) {
   el.innerHTML += `<div class="kpis">
     <div class="kpi"><span class="k">Random baseline</span><span class="v">${fmtR(base.avg_r)}</span></div>
     <div class="kpi"><span class="k">Best signal</span><span class="v">${fmtR(best[1].avg_r)}</span></div>
-    <div class="kpi"><span class="k">Signals beating random</span><span class="v">${sigs.filter(([,v]) => v.avg_r > base.avg_r).length} / ${sigs.length}</span></div>
+    <div class="kpi"><span class="k">Signals beating random</span><span class="v">${sigs.filter(([,v]) => v.avg_r > (v.baseline_avg_r ?? base.avg_r)).length} / ${sigs.length}</span></div>
   </div>
   <p class="note">The <b>random baseline</b> is the same number of trades entered on randomly
   chosen stocks and days, managed with identical exits. It captures how much the market drift
@@ -133,33 +137,65 @@ if (!BT) {
       <span><span class="dot" style="background:var(--vol)"></span>Unusual activity</span>
       <span class="muted">dashed line = random baseline</span>
     </div>
-    <div class="card" id="chart">${barChart(sigs, base.avg_r)}</div>`;
+    <div class="card" id="chart">${barChart(sigs.filter(([k]) => k !== "momentum_6m"), base.avg_r)}</div>
+    <p class="note">The 6-month momentum sleeve is charted in the tables only — its
+    trend-following exits (long hold, wide stop, no target) aren't comparable to the
+    dashed baseline, so it gets its own random control there.</p>`;
+
+  // ---- walk-forward (out-of-sample) — the section that counts ----
+  if (BT.walkforward && Object.keys(BT.walkforward.signals || {}).length) {
+    const wf = BT.walkforward;
+    const wrows = Object.entries(wf.signals)
+      .sort((a, b) => (b[1].test.avg_r - b[1].test_baseline_avg_r) - (a[1].test.avg_r - a[1].test_baseline_avg_r))
+      .map(([k, v]) => {
+        const edge = v.test.avg_r - v.test_baseline_avg_r;
+        return `<tr>
+          <td class="l"><span class="dot" style="background:var(--${FAM_OF[k]})"></span><span class="signame">${NAME[k] || k}</span></td>
+          <td>${v.chosen_hold}d</td>
+          <td class="muted">${fmtR(v.train.avg_r)}</td>
+          <td class="${v.test.avg_r > 0 ? "up" : "down"}">${fmtR(v.test.avg_r)}</td>
+          <td class="muted">${fmtR(v.test_baseline_avg_r)}</td>
+          <td class="${edge > 0.005 ? "up" : edge < -0.005 ? "down" : "muted"}">${fmtR(edge)}</td>
+          <td>${luck(v.p_test, edge)}</td>
+          <td class="muted">${v.test.trades.toLocaleString()}</td></tr>`;
+      }).join("");
+    el.innerHTML += `<h2>Walk-forward: the honest test</h2>
+      <p class="note">Each signal's holding period was chosen using only trades before
+      <b>${wf.split_date}</b> (the training era), then judged on everything after — data the
+      choice never saw. This is the closest a backtest gets to telling the truth. ${wf.configs_tested}
+      configurations were tried in training, so treat borderline p-values with extra suspicion.</p>
+      <div class="card"><table><thead><tr><th class="l">Signal</th>
+      <th title="holding period picked on the training era alone">Hold</th>
+      <th>Train avg R</th><th>Test avg R</th><th title="random entries with identical exits, same test era">Test random</th>
+      <th>Out-of-sample edge</th><th>Luck?</th><th>Test trades</th></tr></thead>
+      <tbody>${wrows}</tbody></table></div>`;
+  }
 
   // ---- per-signal table ----
   let rows = sigs.map(([k, v]) => {
-    const d = v.avg_r - base.avg_r;
+    const d = v.avg_r - (v.baseline_avg_r ?? base.avg_r);
     return `<tr>
       <td class="l"><span class="dot" style="background:var(--${FAM_OF[k]})"></span><span class="signame">${NAME[k] || k}</span></td>
       <td>${v.trades.toLocaleString()}</td>
       <td>${v.win_rate}%</td>
+      <td class="muted">${v.hold ?? "—"}d</td>
       <td>${fmtR(v.avg_r)}</td>
       <td class="${d > 0.005 ? "up" : d < -0.005 ? "down" : "muted"}">${fmtR(d)}</td>
       <td>${luck(v.p_value, d)}</td>
       <td>${v.profit_factor}</td>
-      <td class="muted">${v.avg_hold}d</td>
     </tr>`;
   }).join("");
-  rows += `<tr class="base"><td class="l">Random entries (baseline)</td>
-    <td>${base.trades.toLocaleString()}</td><td>${base.win_rate}%</td>
-    <td>${fmtR(base.avg_r)}</td><td>—</td><td>${base.profit_factor}</td><td>—</td></tr>`;
+  rows += `<tr class="base"><td class="l">Random entries (20d baseline)</td>
+    <td>${base.trades.toLocaleString()}</td><td>${base.win_rate}%</td><td class="muted">20d</td>
+    <td>${fmtR(base.avg_r)}</td><td>—</td><td>—</td><td>${base.profit_factor}</td></tr>`;
   el.innerHTML += `<h2>The numbers</h2><div class="card"><table>
     <thead><tr><th class="l">Signal</th><th title="simulated trades">Trades</th>
     <th title="share of trades that made money">Win rate</th>
+    <th>Hold</th>
     <th title="average profit in units of risk">Avg R</th>
-    <th title="average R minus the random baseline — the actual edge">Edge vs random</th>
+    <th title="average R minus a random baseline with the SAME exit rules — the actual edge">Edge vs random</th>
     <th title="one-sided p-value vs the baseline: how easily this edge could be pure chance">Luck?</th>
-    <th title="gross profits divided by gross losses">Profit factor</th>
-    <th>Avg hold</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <th title="gross profits divided by gross losses">Profit factor</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="note">Reading it: <b>Edge vs random</b> is the column that matters — it is the
     part of the result the signal itself contributed. Win rates below 50% with positive R are
     normal here: winners are built to pay ~1.7× what losers cost.</p>`;

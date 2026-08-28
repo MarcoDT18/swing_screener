@@ -50,10 +50,13 @@ destroyers**, and any realistic aim is a small, disciplined edge — not income.
    stats by regime, and show the live regime on the dashboard.
 2. **Significance**: report per-signal p-values vs the random baseline, so "edge"
    means "unlikely to be luck", not "positive number".
-3. Candidates for later, in evidence order: hold-period sweep for the reversal
-   signals (5/10/20 days); liquidity filter (min dollar volume); a true 6-month
-   momentum sleeve with longer holds; walk-forward (train/test split by era) before
-   trusting any tuned parameter.
+3. **All implemented in backtest v2**: hold-period sweep (5/10/20d; 40/60/80d for
+   the sleeve), liquidity filter ($5M/£2M min daily traded value), a 6-month
+   momentum sleeve with trend-following exits (3×ATR stop, no target), and
+   walk-forward validation — holds chosen on the first 60% of history, judged on
+   the last 40%, with Bonferroni-adjusted p-values for the configurations tried.
+   Remaining candidates: promote the sleeve to the live dashboard if it keeps
+   surviving out-of-sample; deflated-Sharpe reporting; position-sizing rules.
 
 ## Sources
 
