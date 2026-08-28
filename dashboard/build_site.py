@@ -33,7 +33,11 @@ def build(template, marker, data_file, out_name, title):
     payload = "null"
     if os.path.exists(path):
         with open(path) as f:
-            payload = json.dumps(json.load(f), separators=(",", ":"))
+            data = json.load(f)
+        # the backtest page doesn't need the raw trade lists (Monte Carlo does)
+        for sv in data.get("walkforward", {}).get("signals", {}).values():
+            sv.pop("oos_r", None)
+        payload = json.dumps(data, separators=(",", ":"))
     html = wrap(tpl.replace(marker, payload), title)
     os.makedirs(os.path.join(ROOT, "site"), exist_ok=True)
     out = os.path.join(ROOT, "site", out_name)
@@ -47,3 +51,5 @@ if __name__ == "__main__":
           "index.html", "Signal Desk")
     build("backtest_template.html", "/*__BT_DATA__*/", "backtest.json",
           "backtest.html", "Signal Desk — Backtest")
+    build("strategy_template.html", "/*__MC_DATA__*/", "montecarlo.json",
+          "strategy.html", "Signal Desk — Strategy")

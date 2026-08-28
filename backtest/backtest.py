@@ -278,6 +278,9 @@ def run(frames, indices=None):
             "test_baseline_avg_r": round(float(base_test.mean()), 3),
             "p_test": p,
             "p_adjusted": (None if p is None else round(min(1.0, p * n_configs), 3)),
+            # raw test-era trade outcomes, for the Monte Carlo simulator
+            "oos_r": [round(float(x), 3) for x in test_rs],
+            "oos_months": round((test["date"].max() - test["date"].min()).days / 30.44, 1),
         }
 
     # -- regime overall + by year (default holds) --

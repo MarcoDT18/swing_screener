@@ -33,11 +33,14 @@ jobs:
       - name: Run the backtest (~5y, all tickers)
         run: python backtest/backtest.py
 
+      - name: Run the Monte Carlo strategy simulation
+        run: python backtest/montecarlo.py
+
       - name: Commit results
         run: |
           git config user.name "screener-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/backtest.json
+          git add data/backtest.json data/montecarlo.json
           git diff --cached --quiet || git commit -m "backtest: $(date -u +%F)"
           git pull --rebase origin main
           git push

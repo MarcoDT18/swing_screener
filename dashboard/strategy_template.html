@@ -1,0 +1,207 @@
+<title>Signal Desk — Strategy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground: #f6f7f9; --surface: #ffffff; --surface-2: #eef0f4;
+    --ink: #14171e; --ink-2: #5b6472; --ink-3: #8a93a3; --line: #e2e5eb;
+    --accent: #2a78d6; --mom: #2a78d6; --rev: #c98500; --vol: #4a3aa7;
+    --up: #0a7a35; --down: #c23838;
+    --shadow: 0 1px 2px #14171e0d, 0 4px 16px #14171e0a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101319; --surface: #171b23; --surface-2: #1f2530;
+      --ink: #e8eaef; --ink-2: #9aa3b2; --ink-3: #6b7484; --line: #262c38;
+      --accent: #3987e5; --mom: #3987e5; --rev: #c98500; --vol: #9085e9;
+      --up: #35b96a; --down: #e06060;
+      --shadow: 0 1px 2px #0006, 0 6px 20px #0004;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101319; --surface: #171b23; --surface-2: #1f2530;
+    --ink: #e8eaef; --ink-2: #9aa3b2; --ink-3: #6b7484; --line: #262c38;
+    --accent: #3987e5; --mom: #3987e5; --rev: #c98500; --vol: #9085e9;
+    --up: #35b96a; --down: #e06060;
+    --shadow: 0 1px 2px #0006, 0 6px 20px #0004;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.5; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 28px 20px 60px; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; }
+  h1 { margin: 0; font-stretch: 115%; font-weight: 800; font-size: 26px; }
+  h1 small { font-weight: 500; color: var(--ink-2); font-size: 17px; }
+  .stamp { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-2); }
+  a.back { color: var(--accent); text-decoration: none; font-size: 13.5px; }
+  a.back:hover { text-decoration: underline; }
+  .sub { margin: 8px 0 20px; color: var(--ink-2); max-width: 70ch; }
+  h2 { font-size: 16px; margin: 26px 0 10px; }
+  .note { color: var(--ink-2); font-size: 13.5px; max-width: 70ch; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+          box-shadow: var(--shadow); padding: 16px 18px; overflow-x: auto; }
+  .rules { max-width: 74ch; }
+  .rules li { margin: 7px 0; }
+  .rules b { color: var(--ink); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 14px 0 6px; }
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 11px 13px; }
+  .kpi .k { display:block; font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+            letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  .kpi .v { display:block; font-family: "IBM Plex Mono", monospace; font-size: 21px; font-weight: 600;
+            margin-top: 2px; font-variant-numeric: tabular-nums; }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; }
+  th { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .08em;
+       text-transform: uppercase; color: var(--ink-2); font-weight: 500; text-align: right;
+       padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th.l, td.l { text-align: left; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: right;
+       font-family: "IBM Plex Mono", monospace; font-size: 13px; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: 0; }
+  tr.rec td { background: var(--surface-2); font-weight: 600; }
+  .up { color: var(--up); } .down { color: var(--down); } .muted { color: var(--ink-3); }
+  #chart svg { display: block; max-width: 100%; }
+  .warn { border-left: 3px solid var(--rev); padding: 10px 14px; background: var(--surface);
+          border-radius: 6px; font-size: 13.5px; color: var(--ink-2); max-width: 74ch; margin-top: 26px; }
+  .warn b { color: var(--ink); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Signal Desk <small>· strategy</small></h1>
+    <span class="stamp" id="meta"></span>
+    <span><a class="back" href="index.html">← today's scan</a> &nbsp;·&nbsp; <a class="back" href="backtest.html">backtest →</a></span>
+  </header>
+  <p class="sub">This page turns the tested edges into a concrete, followable rule set — and then
+  uses <b>Monte Carlo simulation</b> to show what following it would actually feel like:
+  thousands of simulated trading years, each built by resampling the real out-of-sample trades,
+  so the spread of outcomes (not just the average) is visible before any money moves.</p>
+
+  <div id="content"></div>
+
+  <div class="warn"><b>Read this before acting on anything above.</b> These simulations inherit
+  every assumption of the backtest — an edge measured in one historical window, modest cost
+  estimates, fills at stops without gaps. Real trading adds slippage, missed entries, and the
+  hardest variable: your own behaviour in a drawdown. The stress panel is closer to reality than
+  the headline panel. Nothing here is financial advice, and no simulation makes the future owe
+  you anything. If you trade this, start at the smallest size until live results and simulation
+  agree.</div>
+</div>
+
+<script>
+const MC = /*__MC_DATA__*/;
+const NAME = { ma_crossover:"New uptrend", breakout:"Breakout", rel_strength:"Market leader",
+               momentum_6m:"6-month momentum", pullback:"Dip in an uptrend",
+               oversold_bounce:"Oversold, turning up", volume_spike:"Unusual volume",
+               squeeze:"Coiled spring" };
+const el = document.getElementById("content");
+
+if (!MC || !MC.pool) {
+  document.getElementById("meta").textContent = "no simulation yet";
+  el.innerHTML = `<div class="card"><p class="note" style="margin:4px 0">No signal currently
+  clears the qualification bar (out-of-sample edge ≥ ${(MC && MC.criteria) ? MC.criteria.min_oos_edge : 0.02}R,
+  p ≤ ${(MC && MC.criteria) ? MC.criteria.max_p : 0.2}), or the backtest hasn't run since the
+  Monte Carlo was added. Run the <b>Backtest</b> workflow from the Actions tab to refresh.</p></div>`;
+} else {
+  document.getElementById("meta").textContent =
+    `${MC.pool.n_trades.toLocaleString()} out-of-sample trades · ${MC.sims_per_scenario.toLocaleString()} simulated years per scenario`;
+
+  // ---- the rules ----
+  const sigList = MC.pool.signals.map(s =>
+    `<li><b>${NAME[s.signal] || s.signal}</b> — hold up to ${s.hold} sessions
+     (tested edge +${s.oos_edge}R, p=${s.p_test})</li>`).join("");
+  el.innerHTML += `<h2>The rules</h2>
+  <div class="card rules"><ol>
+    <li><b>Which flags:</b> only the signals that qualified out-of-sample:<ul>${sigList}</ul></li>
+    <li><b>When:</b> take flags from the daily scan; respect the regime banner — skip
+      trend-chasing flags when the market is below its 200-day average (in past bear
+      phases they lost on average).</li>
+    <li><b>Entry & exits:</b> as the dashboard's plan shows — enter near the flagged price,
+      hard stop 1.5× the stock's average daily range below, target 2.5× above, and close
+      whatever remains at the holding limit. The stop is not a suggestion.</li>
+    <li><b>Size:</b> risk <b>${MC.kelly.recommended_risk_pct}%</b> of account equity per trade
+      (the distance from entry to stop = that ${MC.kelly.recommended_risk_pct}%). This is
+      roughly quarter-Kelly — full Kelly (${MC.kelly.full_pct}%) is listed for reference and
+      is a volatility you do not want.</li>
+    <li><b>Liquidity:</b> stocks below ~$5M / £2M daily traded value are excluded already.</li>
+  </ol></div>`;
+
+  // ---- headline KPIs at recommended size ----
+  const rec = MC.scenarios.find(s => s.risk_pct === MC.kelly.recommended_risk_pct) || MC.scenarios[0];
+  el.innerHTML += `<h2>What a year looks like at ${rec.risk_pct}% risk per trade</h2>
+  <div class="kpis">
+    <div class="kpi"><span class="k">Median year</span><span class="v">${fmtPct(rec.median_annual_pct)}</span></div>
+    <div class="kpi"><span class="k">Bad year (5th pct)</span><span class="v">${fmtPct(rec.p05_annual_pct)}</span></div>
+    <div class="kpi"><span class="k">Great year (95th pct)</span><span class="v">${fmtPct(rec.p95_annual_pct)}</span></div>
+    <div class="kpi"><span class="k">Losing years</span><span class="v">${rec.p_losing_year_pct}%</span></div>
+    <div class="kpi"><span class="k">Typical worst drawdown</span><span class="v">−${rec.median_max_dd_pct}%</span></div>
+  </div>
+  <p class="note">Assumes ${MC.pool.trades_per_year_used} trades a year drawn from the tested
+  pool. The drawdown number matters most: even when the edge is real, a normal year dips this
+  far below its peak at some point — knowing that in advance is what stops you quitting at the bottom.</p>`;
+
+  // ---- histogram ----
+  el.innerHTML += `<div class="card" id="chart">${histogram(MC.histogram)}</div>`;
+
+  // ---- sizing table ----
+  const sizeRows = MC.scenarios.map(s => `<tr class="${s.risk_pct === rec.risk_pct ? "rec" : ""}">
+      <td class="l">${s.risk_pct}%${s.risk_pct === rec.risk_pct ? " ← suggested" : ""}</td>
+      <td>${fmtPct(s.median_annual_pct)}</td>
+      <td class="muted">${fmtPct(s.p05_annual_pct)} … ${fmtPct(s.p95_annual_pct)}</td>
+      <td>${s.p_losing_year_pct}%</td>
+      <td>−${s.median_max_dd_pct}%</td>
+      <td class="muted">−${s.p95_max_dd_pct}%</td>
+      <td>${s.p_dd_over_20_pct}%</td></tr>`).join("");
+  el.innerHTML += `<h2>Position sizing: the whole picture</h2>
+  <div class="card"><table><thead><tr><th class="l">Risk/trade</th><th>Median year</th>
+  <th>5th–95th pct</th><th>Losing years</th><th>Typical max DD</th><th>Bad max DD (95th)</th>
+  <th>P(DD &gt; 20%)</th></tr></thead><tbody>${sizeRows}</tbody></table></div>
+  <p class="note">Doubling the risk roughly doubles the median return — and much more than
+  doubles the pain. The right size is the one whose <em>bad</em> column you can live through.</p>`;
+
+  // ---- stress panel ----
+  const stRows = MC.stress.scenarios.map(s => `<tr>
+      <td class="l">${s.risk_pct}%</td><td>${fmtPct(s.median_annual_pct)}</td>
+      <td class="muted">${fmtPct(s.p05_annual_pct)} … ${fmtPct(s.p95_annual_pct)}</td>
+      <td>${s.p_losing_year_pct}%</td><td>−${s.median_max_dd_pct}%</td></tr>`).join("");
+  el.innerHTML += `<h2>Stress test: what if execution is worse than assumed?</h2>
+  <p class="note">Same simulation with every trade docked a further ${MC.stress.haircut_r}R of
+  slippage — a deliberately pessimistic world. If the strategy only works in the headline
+  panel and dies here, it is too fragile to trade.</p>
+  <div class="card"><table><thead><tr><th class="l">Risk/trade</th><th>Median year</th>
+  <th>5th–95th pct</th><th>Losing years</th><th>Typical max DD</th></tr></thead>
+  <tbody>${stRows}</tbody></table></div>`;
+}
+
+function fmtPct(v) { return (v > 0 ? "+" : "") + v + "%"; }
+
+function histogram(h) {
+  if (!h) return "";
+  const W = 840, H = 220, padL = 10, padB = 26, padT = 12;
+  const maxC = Math.max(...h.counts);
+  const n = h.counts.length;
+  const bw = (W - padL * 2) / n;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="distribution of simulated annual returns">`;
+  h.counts.forEach((c, i) => {
+    const x0 = h.edges_pct[i], x1 = h.edges_pct[i + 1];
+    const neg = x1 <= 0;
+    const bh = (H - padB - padT) * c / maxC;
+    s += `<rect x="${(padL + i * bw + 1).toFixed(1)}" y="${(H - padB - bh).toFixed(1)}"
+          width="${(bw - 2).toFixed(1)}" height="${bh.toFixed(1)}" rx="2"
+          fill="var(--${neg ? "down" : "accent"})" opacity="${neg ? 0.85 : 0.9}">
+          <title>${x0}% to ${x1}%: ${c} of 10,000 years</title></rect>`;
+  });
+  // zero line + a few tick labels
+  const zi = h.edges_pct.findIndex(e => e >= 0);
+  if (zi > 0) {
+    const zx = padL + zi * bw;
+    s += `<line x1="${zx}" y1="${padT}" x2="${zx}" y2="${H - padB + 4}" stroke="var(--ink-3)" stroke-width="1.2" stroke-dasharray="3 3"/>`;
+    s += `<text x="${zx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--ink-2)" font-family="IBM Plex Mono,monospace">0%</text>`;
+  }
+  [0, Math.floor(n / 2), n - 1].forEach(i => {
+    if (Math.abs(padL + i * bw - (padL + zi * bw)) < 30) return;
+    s += `<text x="${padL + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono,monospace">${h.edges_pct[i]}%</text>`;
+  });
+  s += `<text x="${padL}" y="${padT + 2}" font-size="11.5" fill="var(--ink-2)" font-family="Archivo,sans-serif">10,000 simulated years at ${h.risk_pct}% risk per trade — annual return</text>`;
+  return s + "</svg>";
+}
+</script>
