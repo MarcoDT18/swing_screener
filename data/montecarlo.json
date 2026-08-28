@@ -1,0 +1,216 @@
+{
+ "generated_utc": "2026-08-28T00:55:37+00:00",
+ "criteria": {
+  "min_oos_edge": 0.02,
+  "max_p": 0.2
+ },
+ "pool": {
+  "signals": [
+   {
+    "signal": "oversold_bounce",
+    "oos_edge": 0.031,
+    "p_test": 0.175,
+    "hold": 20,
+    "trades": 2027
+   },
+   {
+    "signal": "rel_strength",
+    "oos_edge": 0.081,
+    "p_test": 0.009,
+    "hold": 10,
+    "trades": 1433
+   },
+   {
+    "signal": "volume_spike",
+    "oos_edge": 0.092,
+    "p_test": 0.002,
+    "hold": 20,
+    "trades": 2326
+   }
+  ],
+  "n_trades": 5786,
+  "avg_r": 0.094,
+  "trades_per_year_used": 250
+ },
+ "kelly": {
+  "full_pct": 6.43,
+  "quarter_pct": 1.61,
+  "recommended_risk_pct": 1.0
+ },
+ "sims_per_scenario": 10000,
+ "scenarios": [
+  {
+   "risk_pct": 0.25,
+   "median_annual_pct": 5.9,
+   "p05_annual_pct": -2.1,
+   "p95_annual_pct": 14.8,
+   "p_losing_year_pct": 11.5,
+   "median_max_dd_pct": 3.5,
+   "p95_max_dd_pct": 6.8,
+   "p_dd_over_20_pct": 0.0
+  },
+  {
+   "risk_pct": 0.5,
+   "median_annual_pct": 11.6,
+   "p05_annual_pct": -4.3,
+   "p95_annual_pct": 31.4,
+   "p_losing_year_pct": 12.1,
+   "median_max_dd_pct": 7.0,
+   "p95_max_dd_pct": 13.0,
+   "p_dd_over_20_pct": 0.2
+  },
+  {
+   "risk_pct": 1.0,
+   "median_annual_pct": 24.2,
+   "p05_annual_pct": -9.6,
+   "p95_annual_pct": 69.9,
+   "p_losing_year_pct": 12.9,
+   "median_max_dd_pct": 13.6,
+   "p95_max_dd_pct": 24.5,
+   "p_dd_over_20_pct": 14.4
+  },
+  {
+   "risk_pct": 2.0,
+   "median_annual_pct": 48.2,
+   "p05_annual_pct": -20.7,
+   "p95_annual_pct": 177.3,
+   "p_losing_year_pct": 15.5,
+   "median_max_dd_pct": 25.9,
+   "p95_max_dd_pct": 44.3,
+   "p_dd_over_20_pct": 79.1
+  }
+ ],
+ "stress": {
+  "haircut_r": 0.05,
+  "scenarios": [
+   {
+    "risk_pct": 0.25,
+    "median_annual_pct": 2.7,
+    "p05_annual_pct": -5.1,
+    "p95_annual_pct": 11.3,
+    "p_losing_year_pct": 29.1,
+    "median_max_dd_pct": 4.2,
+    "p95_max_dd_pct": 8.2,
+    "p_dd_over_20_pct": 0.0
+   },
+   {
+    "risk_pct": 0.5,
+    "median_annual_pct": 5.0,
+    "p05_annual_pct": -10.5,
+    "p95_annual_pct": 23.3,
+    "p_losing_year_pct": 30.2,
+    "median_max_dd_pct": 8.4,
+    "p95_max_dd_pct": 16.2,
+    "p_dd_over_20_pct": 1.0
+   },
+   {
+    "risk_pct": 1.0,
+    "median_annual_pct": 9.1,
+    "p05_annual_pct": -20.5,
+    "p95_annual_pct": 50.8,
+    "p_losing_year_pct": 32.6,
+    "median_max_dd_pct": 16.4,
+    "p95_max_dd_pct": 30.3,
+    "p_dd_over_20_pct": 30.8
+   },
+   {
+    "risk_pct": 2.0,
+    "median_annual_pct": 15.4,
+    "p05_annual_pct": -38.9,
+    "p95_annual_pct": 120.2,
+    "p_losing_year_pct": 35.7,
+    "median_max_dd_pct": 30.8,
+    "p95_max_dd_pct": 52.4,
+    "p_dd_over_20_pct": 90.4
+   }
+  ]
+ },
+ "histogram": {
+  "risk_pct": 1.0,
+  "counts": [
+   3,
+   3,
+   17,
+   57,
+   137,
+   268,
+   451,
+   603,
+   785,
+   975,
+   1067,
+   980,
+   888,
+   810,
+   731,
+   554,
+   443,
+   354,
+   285,
+   195,
+   119,
+   91,
+   60,
+   40,
+   24,
+   24,
+   13,
+   9,
+   5,
+   4,
+   0,
+   3,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   1
+  ],
+  "edges_pct": [
+   -44.9,
+   -39.0,
+   -33.1,
+   -27.2,
+   -21.2,
+   -15.3,
+   -9.4,
+   -3.5,
+   2.4,
+   8.3,
+   14.2,
+   20.1,
+   26.0,
+   31.9,
+   37.9,
+   43.8,
+   49.7,
+   55.6,
+   61.5,
+   67.4,
+   73.3,
+   79.2,
+   85.1,
+   91.0,
+   97.0,
+   102.9,
+   108.8,
+   114.7,
+   120.6,
+   126.5,
+   132.4,
+   138.3,
+   144.2,
+   150.1,
+   156.1,
+   162.0,
+   167.9,
+   173.8,
+   179.7,
+   185.6,
+   191.5
+  ]
+ }
+}
