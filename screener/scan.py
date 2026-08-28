@@ -64,6 +64,27 @@ def download_all(tickers):
     return out
 
 
+def signal_weights():
+    """Weight each signal by its tested out-of-sample edge (from the monthly
+    backtest's walk-forward table). Signals with no proven edge keep a token
+    0.1 so confluence still counts a little; proven edges dominate the Rank.
+    Falls back to equal weights if no backtest results exist yet."""
+    path = os.path.join(ROOT, "data", "backtest.json")
+    try:
+        with open(path) as f:
+            wf = json.load(f).get("walkforward", {}).get("signals", {})
+        if not wf:
+            raise ValueError("no walkforward block")
+        w = {}
+        for sig, v in wf.items():
+            edge = v["test"]["avg_r"] - v["test_baseline_avg_r"]
+            w[sig] = round(0.1 + 10 * max(0.0, edge), 2)
+        return w
+    except Exception as e:
+        print(f"signal weights fallback (equal): {e}")
+        return {}
+
+
 def market_regime():
     """Where each market sits vs its 200-day average (the Faber filter)."""
     try:
@@ -101,6 +122,7 @@ def main():
             ret3m[t] = extras["ret_3m"]
 
     rs_rank = pd.Series(ret3m).rank(pct=True)  # 0..1 percentile
+    weights = signal_weights()
 
     for t, (hits, extras, df) in results.items():
         rs = float(rs_rank.get(t, 0.5))
@@ -119,7 +141,8 @@ def main():
             "universe": uni[t]["universe"],
             "signals": hits,
             "families": sorted({h["family"] for h in hits}),
-            "score": len(hits) + rs,          # confluence + strength
+            "score": round(sum(weights.get(h["signal"], 1.0) for h in hits) + rs, 2),
+            # evidence-weighted confluence + relative strength
             "rs_pct": round(rs * 100),
             **{k: extras[k] for k in ("close", "chg_1d", "rsi", "spark")},
             **plan,
@@ -137,6 +160,7 @@ def main():
     payload = {
         "generated_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "regime": market_regime(),
+        "weights": weights or None,
         "universe_size": len(tickers),
         "scanned": len(frames),
         "counts": {

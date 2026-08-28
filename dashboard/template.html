@@ -190,8 +190,10 @@
       <b>Buy</b> is the latest price, <b>Stop</b> is where you'd cut the loss if it drops
       (about 1.5 daily ranges below), and <b>Target</b> is the aim (about 2.5 above) —
       so a winning trade makes roughly 1.7× what a losing one costs.</p>
-      <p><b>Rank</b> is highest when several different flags agree on the same stock and it has
-      also been outperforming the market. More agreement ≈ more interesting.</p>
+      <p><b>Rank</b> weighs each flag by the edge it showed in the
+      <a href="backtest.html" style="color:var(--accent)">walk-forward backtest</a>, refreshed
+      monthly — flags marked ★ carried a real tested edge (☆ = borderline), unmarked ones are
+      context only. Outperforming the market adds a little on top.</p>
       <p>This is a mechanical screen of yesterday's closing prices, not advice — always look at
       the chart and the news before trading anything.</p>
     </div>
@@ -384,8 +386,11 @@ function renderRows() {
   for (const s of rows) {
     const tr = document.createElement("tr");
     tr.className = "setup";
-    const chips = s.signals.map(x =>
-      `<span class="sigchip ${FAM[x.family].cls}">${(SIG[x.signal] || {label: x.signal}).label}</span>`).join("");
+    const chips = s.signals.map(x => {
+      const w = (DATA.weights || {})[x.signal] || 0;
+      const star = w >= 0.6 ? "★ " : w >= 0.35 ? "☆ " : "";
+      return `<span class="sigchip ${FAM[x.family].cls}" title="${star ? "backtested edge — see backtest page" : "no tested edge — context only"}">${star}${(SIG[x.signal] || {label: x.signal}).label}</span>`;
+    }).join("");
     tr.innerHTML =
       `<td class="l"><span class="tick">${s.ticker}</span> <span class="uni">${UNI_LABEL[s.universe] || ""}</span><div class="co">${s.name || ""}</div></td>` +
       `<td>${sparkline(s.spark)}</td>` +
